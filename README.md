@@ -1,4 +1,8 @@
-# Heroku Playwright Example
+# BWM Auto Shop
+An attempt at putting BWM scripts onto Heroku, adapted from https://github.com/playwright-community/heroku-playwright-example. Original readme below.
+
+
+# Heroku Playwright Example 
 
 This example demonstrates how to use Playwright with Chromium and Firefox on a Heroku environment.
 

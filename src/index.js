@@ -11,7 +11,7 @@ app.get("/browser/:name", async (req, res) => {
   if (!["chromium", "firefox"].includes(browserName)) {
     return res.status(500).send(`invalid browser name (${browserName})!`)
   }
-  const url = req.query.url || "https://microsoft.com"
+  const url = req.query.url || "https://bigwestmarketing.com"
   const waitUntil = req.query.waitUntil || "load"
   const width = req.query.width ? parseInt(req.query.width, 10) : 1920
   const height = req.query.height ? parseInt(req.query.height, 10) : 1080
