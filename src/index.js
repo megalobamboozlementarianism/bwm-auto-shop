@@ -1,8 +1,10 @@
 const express = require("express")
+const wwwhisper = require('connect-wwwhisper')
 const { chromium } = require("playwright-chromium")
 const { firefox } = require("playwright-firefox")
 
 const app = express()
+app.use(wwwhisper())
 app.use(express.static("./public"))
 const port = process.env.PORT || 3000;
 
