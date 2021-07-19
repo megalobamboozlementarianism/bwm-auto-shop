@@ -22,17 +22,8 @@
                 <h2 class="subtitle">
                     A user interface for Abe's Bots
                 </h2>
-            </div>
-        </div>
-    </section>
-    <div class="container pb-5">
-        
-        <div class="notification">
-        <h1 class="title">Take a screenshot</h1>
-            <p>By selecting a browser and entering a URL, a headless browser instance will be launched and a screenshot is
-            taken on a Heroku dyno.</p>
-            <br>
-            <div class="field has-addons">
+                <br>
+                <h3>Select headless browser</h3>
                 <div class="control">
                     <div class="select">
                         <select id="select-browser">
@@ -41,8 +32,20 @@
                         </select>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+    <div class="container pb-5">
+        
+        <div class="notification">
+            <h1 class="title">Take a screenshot</h1>
+            <p>By selecting a browser and entering a URL (use https://), a headless browser instance will be launched and a screenshot is
+            taken on a Heroku dyno.</p>
+            <br>
+            <div class="field has-addons">
+                
                 <div class="control is-expanded">
-                    <input class="input is-fullwidth" type="url" value="https://bigwestmarketing.com"
+                    <input class="input is-fullwidth" type="url" value="https://bigwestplayground.com/theultimatic"
                         id="input-url">
                 </div>
                 <div class="control">
@@ -54,10 +57,27 @@
         </div>
         <div class="notification">
             <img id="image-screenshot" alt="Rendered screenshot"
-                src="/browser/chromium?url=https%3A%2F%2Fbigwestmarketing.com" />
+                src="" />
         </div>
         <div class="notification">
-
+            <h1 class="title">H Scraper</h1>
+            <p>Input a URL to scrape the H1 and H2 tags for the site (use https://)</p>
+            <br>
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <input class="input is-fullwidth" type="url" value="https://bigwestplayground.com/theultimatic"
+                        id="h-url">
+                </div>
+                <div class="control">
+                    <a class="button is-info" id="hscrape-run">
+                        Scrape H tags
+                    </a>
+                </div>
+            </div>
+            <div id="hscrape-results">
+                <div id="h1-results"></div>
+                <div id="h2-results"></div>
+            </div>
         </div>
     </div>
     <footer class="footer">
@@ -69,6 +89,7 @@
     </footer>
     <script>
         (() => {
+            // screenshot template
             const runBtn = document.querySelector("#btn-run")
             runBtn.addEventListener("click", () => {
                 const browserSelect = document.querySelector("#select-browser")
@@ -78,6 +99,32 @@
 
                 const screenshotElement = document.querySelector("#image-screenshot")
                 screenshotElement.src = `/browser/${browserSelect.value}?${searchParams.toString()}`
+                console.log(screenshotElement.src)
+            })
+
+            // Hscraper
+            const hscrapeBtn = document.querySelector("#hscrape-run")
+            hscrapeBtn.addEventListener("click", (e) => {
+                const hspinner = document.querySelector("#hscrape-spinner")
+                const browserSelect = document.querySelector("#select-browser")
+                const hscrapeUrl = document.querySelector("#h-url")
+                const searchParams = new URLSearchParams()
+                searchParams.set("url", hscrapeUrl.value)
+
+                const h1Results = document.querySelector("#h1-results")
+                const h2Results = document.querySelector("#h2-results")
+                h1Results.innerHTML = "...fetching H1s"
+                h2Results.innerHTML = "...fetching H2s"
+                fetch(`/hscrape?${searchParams.toString()}`)
+                .then(response => {
+                    h1Results.innerHTML = "<strong>H1s</strong>"
+                    h2Results.innerHTML = "<strong>H2s</strong>"
+                    return response.json()
+                })
+                .then(function(data) {
+                    data["h1s"].forEach(elem => h1Results.innerHTML += `<br> ${elem}`)
+                    data["h2s"].forEach(elem => h2Results.innerHTML += `<br> ${elem}`)
+                })
             })
         })()
     </script>
