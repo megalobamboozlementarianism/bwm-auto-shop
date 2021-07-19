@@ -42,7 +42,6 @@ app.post('/hlist', async (req, res) => {
           }
         }
         // get socials
-        console.log("made it to social check")
         const ayys = await page.$$eval('a', links => links.map(a => JSON.parse(`{"status": "", "href": "${a.href}"}`)));
         console.log("got the ayys")
         let socials = []
@@ -55,8 +54,6 @@ app.post('/hlist', async (req, res) => {
           else if (elem.href.includes("homeadvisor")) { socials.push(elem) }
         })
         let clean_socials = new Set(socials);
-        console.log("cleans")
-        console.log(clean_socials)
         for (let elem of clean_socials) {
           let socialpage = await context.newPage();
           try {
@@ -64,13 +61,14 @@ app.post('/hlist', async (req, res) => {
             let code = res.status();
             elem.status = code
           } catch (error) {
+            console.log("got a bad social")
             elem.status = 404
           }
           socialpage.close();
         }
-
+        console.log("before socials_status")
         let socials_status = JSON.stringify(Array.from(clean_socials));
-        console.log(socials_status)
+        console.log("made it socials_status")
         // add output to res json
         output.push({
           "title": title,
