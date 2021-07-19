@@ -17,7 +17,7 @@ app.post('/hlist', async (req, res) => {
         chromiumSandbox: false
       })
       let context = await browser.newContext({viewport: { width: 800, height: 1200 }})
-      await context.setDefaultTimeout(15000)
+      await context.setDefaultTimeout(0)
       page = await context.newPage();
       let output = []
       for (let i = 0; i < body.length; i++){
