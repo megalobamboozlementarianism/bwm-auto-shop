@@ -134,12 +134,14 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                      console.log(data)
                       hlistResults.innerHTML = "<h3>Results:</h3>"
                       data.forEach( (elem, index) => {
-                        hlistResults.innerHTML += `<br><strong>Site ${index}: </strong> ${elem.site}`;
+                        hlistResults.innerHTML += `<br><br><strong>Site ${index}: </strong> ${elem.site}`;
+                        hlistResults.innerHTML += `<br><strong>Title: </strong> ${elem.title}`;
                         hlistResults.innerHTML += `<br><strong>H1s: </strong> ${elem.h1s}`;
                         hlistResults.innerHTML += `<br><strong>H2s: </strong> ${elem.h2s}`;
+                        hlistResults.innerHTML += `<br><strong>Schema Data: </strong> ${elem.schema}`;
+                        hlistResults.innerHTML += `<br><strong>Socials: </strong> ${elem.socials}`;
                       })
                       console.log('Success:', JSON.stringify(data));
                     })
