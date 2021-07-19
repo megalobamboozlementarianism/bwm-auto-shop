@@ -20,6 +20,7 @@ app.post('/hlist', async (req, res) => {
       let context = await browser.newContext({viewport: { width: 800, height: 1200 }})
       page = await context.newPage();
       let output = []
+      console.log("made it just before for-loop")
       for (let i = 0; i < body.length; i++){
         console.log(`Incoming request for URL '${body[i]}'`)
         await page.goto(body[i])
