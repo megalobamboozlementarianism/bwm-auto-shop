@@ -11,8 +11,6 @@ app.use(express.json())
 
 app.post('/hlist', async (req, res) => {
   const body = req.body
-
-  console.log(`Incoming request for URL '${body[0]}'`)
     try {
       
       /** @type {import('playwright-chromium').Browser} */
@@ -23,6 +21,7 @@ app.post('/hlist', async (req, res) => {
       page = await context.newPage();
       let output = []
       for (let i = 0; i < body.length; i++){
+        console.log(`Incoming request for URL '${body[i]}'`)
         await page.goto(body[i])
         if (req.query.timeout) {
           await page.waitForTimeout(parseInt(req.query.timeout, 10))
@@ -57,12 +56,7 @@ app.get('/hscrape', async (req, res) => {
         })
         let context = await browser.newContext({viewport: { width: 800, height: 1200 }})
         page = await context.newPage();
-        
         await page.goto(url)
-  
-        if (req.query.timeout) {
-          await page.waitForTimeout(parseInt(req.query.timeout, 10))
-        }
         const h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
         const h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
         await browser.close()
