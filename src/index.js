@@ -10,9 +10,9 @@ app.use(express.json())
 
 
 app.post('/hlist', async (req, res) => {
+  console.log("hi from /hlist")
   const body = req.body
     try {
-      
       /** @type {import('playwright-chromium').Browser} */
       const browser = await chromium.launch({
         chromiumSandbox: false
@@ -23,9 +23,6 @@ app.post('/hlist', async (req, res) => {
       for (let i = 0; i < body.length; i++){
         console.log(`Incoming request for URL '${body[i]}'`)
         await page.goto(body[i])
-        if (req.query.timeout) {
-          await page.waitForTimeout(parseInt(req.query.timeout, 10))
-        }
         const h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
         const h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
         output.push({
