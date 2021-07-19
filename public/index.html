@@ -102,6 +102,7 @@
                     return response.json()
                 })
                 .then(function(data) {
+                    console.log(data)
                     data["h1s"].forEach(elem => h1Results.innerHTML += `<br> ${elem}`)
                     data["h2s"].forEach(elem => h2Results.innerHTML += `<br> ${elem}`)
                 })
@@ -133,6 +134,7 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                      console.log(data)
                       hlistResults.innerHTML = "<h3>Results:</h3>"
                       data.forEach( (elem, index) => {
                         hlistResults.innerHTML += `<br><strong>Site ${index}: </strong> ${elem.site}`;
