@@ -22,45 +22,13 @@
                 <h2 class="subtitle">
                     A user interface for Abe's Bots
                 </h2>
-                <br>
-                <h3>Select headless browser</h3>
-                <div class="control">
-                    <div class="select">
-                        <select id="select-browser">
-                            <option value="chromium">Chromium</option>
-                            <option value="firefox">Firefox</option>
-                        </select>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
     <div class="container pb-5">
-        
+
         <div class="notification">
-            <h1 class="title">Take a screenshot</h1>
-            <p>By selecting a browser and entering a URL (use https://), a headless browser instance will be launched and a screenshot is
-            taken on a Heroku dyno.</p>
-            <br>
-            <div class="field has-addons">
-                
-                <div class="control is-expanded">
-                    <input class="input is-fullwidth" type="url" value="https://bigwestplayground.com/theultimatic"
-                        id="input-url">
-                </div>
-                <div class="control">
-                    <a class="button is-info" id="btn-run">
-                        Make a screenshot
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="notification">
-            <img id="image-screenshot" alt="Rendered screenshot"
-                src="" />
-        </div>
-        <div class="notification">
-            <h1 class="title">H Scraper</h1>
+            <h1 class="title">Single-site H Scraper</h1>
             <p>Input a URL to scrape the H1 and H2 tags for the site (use https://)</p>
             <br>
             <div class="field has-addons">
@@ -79,6 +47,33 @@
                 <div id="h2-results"></div>
             </div>
         </div>
+
+        
+        <div class="notification">
+            <h1 class="title">Multi-site H Scraper</h1>
+            <p>Input a JSON array of URLs to scrape the H1 and H2 tags for each site</p>
+            <br>
+            <div id="file-js-example" class="file has-name">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="">
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                            Choose a file…
+                        </span>
+                    </span>
+                    <span class="file-name">
+                    No file uploaded
+                    </span>
+                </label>
+            </div>
+            <div id="hlist-results">
+                <div id="h1-list-results"></div>
+                <div id="h2-list-results"></div>
+            </div>
+        </div>
     </div>
     <footer class="footer">
         <div class="content has-text-centered">
@@ -89,25 +84,11 @@
     </footer>
     <script>
         (() => {
-            // screenshot template
-            const runBtn = document.querySelector("#btn-run")
-            runBtn.addEventListener("click", () => {
-                const browserSelect = document.querySelector("#select-browser")
-                const screenshotUrl = document.querySelector("#input-url")
-                const searchParams = new URLSearchParams()
-                searchParams.set("url", screenshotUrl.value)
-
-                const screenshotElement = document.querySelector("#image-screenshot")
-                screenshotElement.src = `/browser/${browserSelect.value}?${searchParams.toString()}`
-                console.log(screenshotElement.src)
-            })
-
             // Hscraper
             const hscrapeBtn = document.querySelector("#hscrape-run")
             hscrapeBtn.addEventListener("click", (e) => {
-                const hspinner = document.querySelector("#hscrape-spinner")
                 const browserSelect = document.querySelector("#select-browser")
-                const hscrapeUrl = document.querySelector("#h-url")
+                const hscrapeUrls = document.querySelector("#h-url")
                 const searchParams = new URLSearchParams()
                 searchParams.set("url", hscrapeUrl.value)
 
@@ -126,6 +107,50 @@
                     data["h2s"].forEach(elem => h2Results.innerHTML += `<br> ${elem}`)
                 })
             })
+
+            // hlist scraper
+                const fileInput = document.querySelector('#file-js-example input[type=file]');
+                fileInput.onchange = () => {
+                    if (fileInput.files.length > 0) {
+                    const fileName = document.querySelector('#file-js-example .file-name');
+                    fileName.innerHTML = fileInput.files[0].name;
+                    
+                    const hlistResults = document.querySelector("#hlist-results")
+                    hlistResults.innerHTML = "...please wait while those tags are fetched."
+                    const data = fileInput.files[0];
+                   
+                    fetch('/hlist', {
+                      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                      mode: 'cors', // no-cors, *cors, same-origin
+                      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                      credentials: 'same-origin', // include, *same-origin, omit
+                      headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded',
+                      },
+                      redirect: 'follow', // manual, *follow, error
+                      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                      body: data // body data type must match "Content-Type" header
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                      hlistResults.innerHTML = "<h3>Results:</h3>"
+                      data.forEach( (elem, index) => {
+                        hlistResults.innerHTML += `<br><strong>Site ${index}: </strong> ${elem.site}`;
+                        hlistResults.innerHTML += `<br><strong>H1s: </strong> ${elem.h1s}`;
+                        hlistResults.innerHTML += `<br><strong>H2s: </strong> ${elem.h2s}`;
+                      })
+                      console.log('Success:', JSON.stringify(data));
+                    })
+                    .catch((error) => {
+                      
+                    console.error('Error:', JSON.stringify(error));
+                    });
+                    }
+                }
+
+                
+                
         })()
     </script>
 
