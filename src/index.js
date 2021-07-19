@@ -58,9 +58,12 @@ app.post('/hlist', async (req, res) => {
         for (let elem of clean_socials) {
           let socialpage = await context.newPage();
           try {
+            console.log(`trying ${elem.href}`)
             let res = await socialpage.goto(elem.href, 0)
-            let code = res.status();
-            elem.status = code
+            if (res) {
+              let code = res.status();
+              elem.status = code
+            }
           } catch (error) {
             console.log("got a bad social")
             elem.status = 404
@@ -69,7 +72,7 @@ app.post('/hlist', async (req, res) => {
         }
         console.log("before socials_status")
         let socials_status = JSON.stringify(Array.from(clean_socials));
-        console.log("made it socials_status")
+        console.log("made it past socials_status")
         // add output to res json
         output.push({
           "title": title,
