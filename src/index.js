@@ -11,6 +11,7 @@ app.use(express.json())
 
 app.post('/hlist', async (req, res) => {
   const body = req.body
+  let output = []
     try {
       /** @type {import('playwright-chromium').Browser} */
       const browser = await chromium.launch({
@@ -19,7 +20,6 @@ app.post('/hlist', async (req, res) => {
       let context = await browser.newContext({viewport: { width: 800, height: 1200 }})
       await context.setDefaultTimeout(0)
       page = await context.newPage();
-      let output = []
       for (let i = 0; i < body.length; i++){
         console.log(`Incoming request for URL '${body[i]}'`)
         await page.goto(body[i])
@@ -84,14 +84,15 @@ app.post('/hlist', async (req, res) => {
         })
       }
       await browser.close()
-      res.contentType("application/json")
-      res.set("Content-Disposition", "inline;");
-      res.send(output)
     } catch (err) {
-      res.contentType("text/plain")
-      res.set("Content-Disposition", "inline;");
-      res.status(500).send(`Something went wrong: ${err}`)
+      // res.contentType("text/plain")
+      // res.set("Content-Disposition", "inline;");
+      // res.status(500).send(`Something went wrong: ${err}`)
+      console.log(`error: ${err}`)
     }
+    res.contentType("application/json")
+    res.set("Content-Disposition", "inline;");
+    res.send(output)
 });
 
 app.get('/hscrape', async (req, res) => {
