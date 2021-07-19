@@ -87,8 +87,7 @@
             // Hscraper
             const hscrapeBtn = document.querySelector("#hscrape-run")
             hscrapeBtn.addEventListener("click", (e) => {
-                const browserSelect = document.querySelector("#select-browser")
-                const hscrapeUrls = document.querySelector("#h-url")
+                const hscrapeUrl = document.querySelector("#h-url")
                 const searchParams = new URLSearchParams()
                 searchParams.set("url", hscrapeUrl.value)
 
