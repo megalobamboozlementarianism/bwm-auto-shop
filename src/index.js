@@ -109,6 +109,7 @@ async function siteCheck (siteList) {
 
     //do lighthouse tests
     const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless', '--no-sandbox'] });
+    
 
     for (let i = 0; i < siteList.length; i++) {
       console.log(`running Lighthouse on: ${siteList[i]}`)
