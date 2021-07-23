@@ -19,6 +19,7 @@
   "dependencies": {
     "connect-wwwhisper": "^0.1.21",
     "express": "^4.17.1",
+    "lighthouse": "^8.1.0",
     "playwright-chromium": "^1.9.0"
   }
 }
