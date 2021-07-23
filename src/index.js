@@ -113,7 +113,7 @@ async function siteCheck (siteList) {
 
     for (let i = 0; i < siteList.length; i++) {
       console.log(`running Lighthouse on: ${siteList[i]}`)
-      let options = { logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'mobile' };
+      let options = { skipAudits: ['full-page-screenshot'], logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'mobile' };
       let runnerResult = await lighthouse(siteList[i], options);
       let score = runnerResult.lhr.categories.performance.score * 100;
       outputLong.push({
@@ -123,7 +123,7 @@ async function siteCheck (siteList) {
         "datum": score
       })
 
-      options = { logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'desktop' };
+      options = { skipAudits: ['full-page-screenshot'], logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'desktop' };
       runnerResult = await lighthouse(siteList[i], options);
       score = runnerResult.lhr.categories.performance.score * 100;
       outputLong.push({
