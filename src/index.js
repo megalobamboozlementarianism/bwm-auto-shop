@@ -109,11 +109,11 @@ async function siteCheck (siteList) {
 
     //do lighthouse tests
     const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless', '--no-sandbox'] });
-    
+    console.log(chrome.port)
 
     for (let i = 0; i < siteList.length; i++) {
       console.log(`running Lighthouse on: ${siteList[i]}`)
-      let options = { onlyCategories: ['performance'], port: chrome.port, strategy: 'mobile' };
+      let options = { logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'mobile' };
       let runnerResult = await lighthouse(siteList[i], options);
       let score = runnerResult.lhr.categories.performance.score * 100;
       outputLong.push({
@@ -123,7 +123,7 @@ async function siteCheck (siteList) {
         "datum": score
       })
 
-      options = { onlyCategories: ['performance'], port: chrome.port, strategy: 'desktop' };
+      options = { logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'desktop' };
       runnerResult = await lighthouse(siteList[i], options);
       score = runnerResult.lhr.categories.performance.score * 100;
       outputLong.push({
@@ -134,6 +134,7 @@ async function siteCheck (siteList) {
       })
     }
 
+    // await browser.close()
     await chrome.kill()
 
     result = outputLong;
