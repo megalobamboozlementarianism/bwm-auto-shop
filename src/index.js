@@ -26,82 +26,132 @@ async function siteCheck (siteList) {
     page = await context.newPage();
     for (let i = 0; i < siteList.length; i++) {
       console.log(`Incoming request for URL '${siteList[i]}'`)
-      await page.goto(siteList[i])
-      // get title
-      const title = await page.title()
-      outputLong.push({
-        "date": `${Date()}`,
-        "site": `${siteList[i]}`,
-        "data_type": "Title Tag",
-        "datum": `${title}`
-      })
+      // get title tag
+      try {
+        await page.goto(siteList[i])
+        const title = await page.title()
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "Title Tag",
+          "datum": `${title}`
+        })
+      } catch (err) {
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "Title Tag",
+          "datum": err
+        })
+      }
 
-      // get h1s and h2s
-      const h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
-      h1s.forEach(elem => outputLong.push({
-        "date": `${Date()}`,
-        "site": `${siteList[i]}`,
-        "data_type": "h1",
-        "datum": `${elem}` 
-      }))
-      const h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
-      h2s.forEach(elem => outputLong.push({
-        "date": `${Date()}`,
-        "site": `${siteList[i]}`,
-        "data_type": "h2",
-        "datum": `${elem}`
-      }))
+      // get h1s
+      try {
+        const h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
+        h1s.forEach(elem => outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "h1",
+          "datum": `${elem}`
+        }))
+      } catch (err) {
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "h1",
+          "datum": err
+        })
+      }
+      
+      // get h2s
+      try {
+        const h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
+        h2s.forEach(elem => outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "h2",
+          "datum": `${elem}`
+        }))
+      } catch (err) {
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "h2",
+          "datum": err
+        })
+      }
+
 
       // get schema
-      const scripts = await page.$$('script')
-      for (let j = 0; j < scripts.length; j++) {
-        let type = await scripts[j].getAttribute("type")
-        if (type === "application/ld+json") {
-          let obj = await scripts[j].innerText()
-          if (obj.includes(`"@type": "LocalBusiness"`)) {
-            let data = JSON.parse(obj)
-            let clean = JSON.stringify(data, null, 4);
-            outputLong.push({
-              "date": `${Date()}`,
-              "site": `${siteList[i]}`,
-              "data_type": "Schema",
-              "datum": `${clean}`
-            })
+      try {
+        const scripts = await page.$$('script')
+        for (let j = 0; j < scripts.length; j++) {
+          let type = await scripts[j].getAttribute("type")
+          if (type === "application/ld+json") {
+            let obj = await scripts[j].innerText()
+            if (obj.includes(`"@type": "LocalBusiness"`)) {
+              let data = JSON.parse(obj)
+              let clean = JSON.stringify(data, null, 4);
+              outputLong.push({
+                "date": `${Date()}`,
+                "site": `${siteList[i]}`,
+                "data_type": "Schema",
+                "datum": `${clean}`
+              })
+            }
           }
         }
+      } catch (err) {
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "Schema",
+          "datum": err
+        })
       }
+      
       // get socials
-      const ayys = await page.$$eval('a', links => links.map(a => JSON.parse(`{"status": "", "href": "${a.href}"}`)));
-      let socials = []
-      ayys.forEach(elem => {
-        if (elem.href.includes("facebook")) { socials.push(elem) }
-        else if (elem.href.includes("yelp")) { socials.push(elem) }
-        else if (elem.href.includes("instagram")) { socials.push(elem) }
-        else if (elem.href.includes("youtube")) { socials.push(elem) }
-        else if (elem.href.includes("google")) { socials.push(elem) }
-        else if (elem.href.includes("homeadvisor")) { socials.push(elem) }
-      })
-      let clean_socials = new Set(socials);
-      for (let elem of clean_socials) {
-        let socialpage = await context.newPage();
-        try {
-          let res = await socialpage.goto(elem.href, 0)
-          if (res) {
-            let code = res.status();
-            elem.status = code
+      try {
+        const ayys = await page.$$eval('a', links => links.map(a => JSON.parse(`{"status": "", "href": "${a.href}"}`)));
+        let socials = []
+        ayys.forEach(elem => {
+          if (elem.href.includes("facebook")) { socials.push(elem) }
+          else if (elem.href.includes("yelp")) { socials.push(elem) }
+          else if (elem.href.includes("instagram")) { socials.push(elem) }
+          else if (elem.href.includes("youtube")) { socials.push(elem) }
+          else if (elem.href.includes("google")) { socials.push(elem) }
+          else if (elem.href.includes("homeadvisor")) { socials.push(elem) }
+        })
+        let clean_socials = new Set(socials);
+        for (let elem of clean_socials) {
+          let socialpage = await context.newPage();
+          try {
+            let res = await socialpage.goto(elem.href, 0)
+            if (res) {
+              let code = res.status();
+              elem.status = code
+            }
+          } catch (error) {
+            console.log("got a bad social")
+            elem.status = 404
           }
-        } catch (error) {
-          console.log("got a bad social")
-          elem.status = 404
+          outputLong.push({
+            "date": `${Date()}`,
+            "site": `${siteList[i]}`,
+            "data_type": "Social Link",
+            "datum": `${elem.status} ${elem.href}`
+          })
+          socialpage.close();
         }
+      } catch (err) {
         outputLong.push({
           "date": `${Date()}`,
           "site": `${siteList[i]}`,
           "data_type": "Social Link",
-          "datum": `${elem.status} ${elem.href}`
+          "datum": err
         })
-        socialpage.close();
       }
+      
     }
     await browser.close()
 
@@ -146,8 +196,15 @@ async function siteCheck (siteList) {
     await chrome.kill()
 
     result = outputLong;
-    console.log("data ready to check")
+    console.log("data ready to check ( with errors )")
   } catch (err) {
+    outputLong.push({
+      "date": `${Date()}`,
+      "site": `${siteList[i]}`,
+      "data_type": "Desktop Speed",
+      "datum": err
+    })
+    result = outputLong;
     // res.contentType("text/plain")
     // res.set("Content-Disposition", "inline;");
     // res.status(500).send(`Something went wrong: ${err}`)
