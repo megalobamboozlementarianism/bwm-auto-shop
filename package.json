@@ -1,21 +1,14 @@
 {
-  "name": "heroku-playwright-example",
+  "name": "bwm-auto-shop",
   "version": "1.0.0",
   "description": "Example how you can use Playwright on Heroku",
   "scripts": {
     "start": "node src/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mxschmitt/heroku-playwright-example.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mxschmitt/heroku-playwright-example/issues"
-  },
-  "homepage": "https://github.com/mxschmitt/heroku-playwright-example#readme",
+  "homepage": "",
   "dependencies": {
     "connect-wwwhisper": "^0.1.21",
     "express": "^4.17.1",

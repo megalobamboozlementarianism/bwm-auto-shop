@@ -10,13 +10,11 @@ app.use(wwwhisper())
 app.use(express.static("./public"))
 app.use(express.json())
 
-let body;
 let result;
 let timeleft;
 
 async function siteCheck (siteList) {
   timeleft = siteList.length
-  let output = []
   let outputLong = []
   try {
     /** @type {import('playwright-chromium').Browser} */
@@ -112,26 +110,36 @@ async function siteCheck (siteList) {
     console.log(chrome.port)
 
     for (let i = 0; i < siteList.length; i++) {
-      console.log(`running Lighthouse on: ${siteList[i]}`)
-      let options = { skipAudits: ['full-page-screenshot'], logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'mobile' };
-      let runnerResult = await lighthouse(siteList[i], options);
-      let score = runnerResult.lhr.categories.performance.score * 100;
-      outputLong.push({
-        "date": `${Date()}`,
-        "site": `${siteList[i]}`,
-        "data_type": "Mobile Speed",
-        "datum": score
-      })
+      try {
+        console.log(`running Lighthouse on: ${siteList[i]}`)
+        let options = { skipAudits: ['full-page-screenshot'], logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'mobile' };
+        let runnerResult = await lighthouse(siteList[i], options);
+        let score = runnerResult.lhr.categories.performance.score * 100;
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "Mobile Speed",
+          "datum": score
+        })
 
-      options = { skipAudits: ['full-page-screenshot'], logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'desktop' };
-      runnerResult = await lighthouse(siteList[i], options);
-      score = runnerResult.lhr.categories.performance.score * 100;
-      outputLong.push({
-        "date": `${Date()}`,
-        "site": `${siteList[i]}`,
-        "data_type": "Desktop Speed",
-        "datum": score
-      })
+        options = { skipAudits: ['full-page-screenshot'], logLevel: 'info', onlyCategories: ['performance'], port: chrome.port, strategy: 'desktop' };
+        runnerResult = await lighthouse(siteList[i], options);
+        score = runnerResult.lhr.categories.performance.score * 100;
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "Desktop Speed",
+          "datum": score
+        })
+      } catch (err ) {
+        outputLong.push({
+          "date": `${Date()}`,
+          "site": `${siteList[i]}`,
+          "data_type": "Desktop Speed",
+          "datum": err
+        })
+      }
+      
     }
 
     // await browser.close()
