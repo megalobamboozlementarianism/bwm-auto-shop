@@ -69,16 +69,18 @@
                     </span>
                 </label>
             </div>
+            <br><button class="button is-info is-invisible" id="sc-check" >check</button>
+            <button class="button is-info is-invisible" id="sc-reset" >reset</button>
             <div id="hlist-results">
-
             </div>
-            <br><button class="button is-info is-invisible" id="check" >check</button>
         </div>
 
         <div class="notification">
             <h1 class="title">Run Lighthouse</h1>
             <p>Input a JSON array of URLs to run lighthouse on</p>
             <br>
+            <br><button class="button is-info is-invisible" id="lh-check" >check</button>
+            <button class="button is-info is-invisible" id="lh-reset" >reset</button>
             <div id="file-js-example-lh" class="file has-name">
                 <label class="file-label">
                     <input class="file-input" type="file" name="">
@@ -96,9 +98,7 @@
                 </label>
             </div>
             <div id="LH-results">
-
             </div>
-            <br><button class="button is-info is-invisible" id="checkLH" >check</button>
         </div>
     </div>
     <footer class="footer">
@@ -128,14 +128,17 @@
                   return response.json()
               })
               .then(function(data) {
-                  console.log(data)
+                  console.log(JSON.stringify(data))
                   data["h1s"].forEach(elem => h1Results.innerHTML += `<br> ${elem}`)
                   data["h2s"].forEach(elem => h2Results.innerHTML += `<br> ${elem}`)
               })
           })
 
-            // hlist scraper
+            // sitecheck scraper
           const fileInput = document.querySelector('#file-js-example input[type=file]');
+          fileInput.addEventListener("click", (e) => {
+            fileInput.value = ''
+          })
           fileInput.onchange = () => {
               if (fileInput.files.length > 0) {
               const fileName = document.querySelector('#file-js-example .file-name');
@@ -144,7 +147,7 @@
               const hlistResults = document.querySelector("#hlist-results")
               const data = fileInput.files[0];
               
-              fetch('/hlist', {
+              fetch('/sitecheck', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 mode: 'cors', // no-cors, *cors, same-origin
                 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -168,26 +171,49 @@
               }
           }
 
-          const checkBtn = document.querySelector("#check")
+          const checkBtn = document.querySelector("#sc-check")
           checkBtn.addEventListener("click", (e) => {
             const hlistResults = document.querySelector("#hlist-results")
             fetch(`/check`)
             .then(response => response.json())
             .then(data => {
               hlistResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+              resetBtn.classList.remove('is-invisible')
             }) 
-          })  
+          })
+
+          const resetBtn = document.querySelector("#sc-reset")  
+          resetBtn.addEventListener("click", (e) => {
+            const hlistResults = document.querySelector("#hlist-results")
+            const LHResults = document.querySelector("##LH-results")
+            fetch(`/reset`)
+            .then(response => response.json())
+            .then(data => {
+              hlistResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+            }) 
+          }) 
 
           // lighthouse
-           const checkBtnLH = document.querySelector("#checkLH")
+           const checkBtnLH = document.querySelector("#lh-check")
           checkBtnLH.addEventListener("click", (e) => {
             const LHResults = document.querySelector("#LH-results")
             fetch(`/check`)
             .then(response => response.json())
             .then(data => {
               LHResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+              lhResetBtn.classList.remove('is-invisible')
             }) 
           })
+          const lhResetBtn = document.querySelector("#lh-reset")  
+          lhResetBtn.addEventListener("click", (e) => {
+            const LHResults = document.querySelector("#LH-results")
+            fetch(`/reset`)
+            .then(response => response.json())
+            .then(data => {
+              LHResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+            }) 
+          }) 
+
           const fileInputLH = document.querySelector('#file-js-example-lh input[type=file]');
           fileInputLH.onchange = () => {
               if (fileInputLH.files.length > 0) {
