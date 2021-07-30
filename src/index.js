@@ -77,7 +77,7 @@ app.get('/hscrape', async (req, res) => {
     console.log(JSON.stringify(h1s))
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
-    res.send([{"h1s": h1s, "h2s": h2s }])
+    res.send({"h1s": h1s, "h2s": h2s })
   } catch (err) {
     res.status(500).send(`Something went wrong: ${err}`)
   }
