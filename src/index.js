@@ -57,24 +57,17 @@ app.post('/dolighthouse', async (req, res) => {
 app.get('/hscrape', async (req, res) => {
   const url = req.query.url
   console.log(`Incoming request for URL '${url}'`)
-  console.log("0 hi")
   /** @type {import('playwright-chromium').Browser} */
   const browser = await chromium.launch({
     chromiumSandbox: false
   })
   try {
-    console.log("hi")
     let context = await browser.newContext({viewport: { width: 800, height: 1200 }})
-    console.log("hi hi")
     await context.setDefaultTimeout(0)
-    console.log("hi hi hi")
     const page = await context.newPage();
-    console.log("hi hi hi hi")
     await page.goto(url)
-    console.log("hi hi hi hi hi")
     const h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
     const h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
-    console.log(JSON.stringify(h1s))
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
     res.send({"h1s": h1s, "h2s": h2s })
