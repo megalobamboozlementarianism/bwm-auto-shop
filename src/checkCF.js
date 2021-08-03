@@ -47,21 +47,18 @@ module.exports = async function get_cfs (sites, result, reset) {
         })
         .catch(error => console.log('error', error));
     }
-    // console.log(cf_info)
 
     // check dns
     sites.forEach(async site => {
       let mx = []
       await dns.resolveMx(site, function (err, addresses) {
         if (addresses) {
-          mx = addresses;
+          addresses.forEach( elem => mx.push(elem))
         } else {
-          mx = ["no mx records found"]
+          mx.push("no mx records found")
         }
-        
       })
       await dns.resolve4(site, function (err, addresses) {
-        // console.log("site: ", site, "dns: ", addresses, "err: ", err)
         let index = cf_names.indexOf(site)
         if (cf_names.includes(site)) {
           let records = {
@@ -73,12 +70,10 @@ module.exports = async function get_cfs (sites, result, reset) {
             "original_registrar": cf_info[index].original_registrar,
             "mx records": mx
           }
-          let output = JSON.stringify(records, null, 2);
-          console.log(output)
+          
           // send to results to return to front end
           result.push(records)
         } else {
-          console.log("cf info: ", cf_info[index])
           let records = {
             "site": site,
             "ip_addr": addresses,
@@ -88,8 +83,7 @@ module.exports = async function get_cfs (sites, result, reset) {
             "original_registrar": cf_info[index] || `data not available`,
             "mx records": mx
           }
-          let output = JSON.stringify(records, null, 2);
-          // console.log(output)
+          
           // send to results to return to front end
           result.push(records)
         }
