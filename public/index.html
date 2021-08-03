@@ -100,6 +100,32 @@
             <div id="LH-results">
             </div>
         </div>
+
+          <div class="notification">
+            <h1 class="title">Check Cloudflare and DNS</h1>
+            <p>Input a JSON array of URLs to get the cloudflare status and DNS records</p>
+            <br>
+            <div id="file-js-example-cfdns" class="file has-name">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="">
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                            Choose a file…
+                        </span>
+                    </span>
+                    <span class="file-name">
+                    No file uploaded
+                    </span>
+                </label>
+            </div>
+            <br><button class="button is-info is-invisible" id="cfdns-check" >check</button>
+            <button class="button is-info is-invisible" id="cfdns-reset" >reset</button>
+            <div id="cfdns-results">
+            </div>
+        </div>
     </div>
     <footer class="footer">
         <div class="content has-text-centered">
@@ -110,6 +136,64 @@
     </footer>
     <script>
         (() => {
+          // cfdns scraper
+          const checkBtnCFDNS = document.querySelector("#cfdns-check")
+          checkBtnCFDNS.addEventListener("click", (e) => {
+            const cfdnsResults = document.querySelector("#cfdns-results")
+            fetch(`/check`)
+            .then(response => response.json())
+            .then(data => {
+              cfdnsResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+              resetBtnCFDNS.classList.remove('is-invisible')
+            }) 
+          })
+
+          const resetBtnCFDNS = document.querySelector("#cfdns-reset")  
+          resetBtnCFDNS.addEventListener("click", (e) => {
+            const cfdnsresults = document.querySelector("#cfdns-results")
+            fetch(`/reset`)
+            .then(response => response.json())
+            .then(data => {
+              cfdnsresults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+            }) 
+          }) 
+
+          const fileInputCFDNS = document.querySelector('#file-js-example-cfdns input[type=file]');
+          fileInputCFDNS.addEventListener("click", (e) => {
+            fileInputCFDNS.value = ''
+          })
+          fileInputCFDNS.onchange = () => {
+              if (fileInputCFDNS.files.length > 0) {
+              const fileNameCFDNS = document.querySelector('#file-js-example-cfdns .file-name');
+              fileNameCFDNS.innerHTML = fileInputCFDNS.files[0].name;
+              
+              const CFDNSResults = document.querySelector("#cfdns-results")
+              const data = fileInputCFDNS.files[0];
+              
+              fetch('/cfdns', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                  'Content-Type': 'application/json'
+                  // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: data // body data type must match "Content-Type" header
+              })
+              .then(response => response.json())
+              .then(data => {
+                CFDNSResults.innerHTML += `<br><br><strong>${data.message}</strong>`;
+                checkBtnCFDNS.classList.remove('is-invisible')
+              })
+              .catch((error) => {
+                console.error('Error:', JSON.stringify(error));
+              });
+              }
+          }
+
             // Hscraper
           const hscrapeBtn = document.querySelector("#hscrape-run")
           hscrapeBtn.addEventListener("click", (e) => {
@@ -245,7 +329,7 @@
               .catch((error) => {
                 console.error('Error:', JSON.stringify(error));
               });
-              }
+            }
           }
           
                 

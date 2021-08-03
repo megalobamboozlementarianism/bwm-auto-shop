@@ -12,6 +12,7 @@ app.use(express.json())
 
 const siteCheck = require('./siteCheck');
 const doLighthouse = require('./doLighthouse');
+const cfdns = require('./checkCF')
 
 
 let result = [];
@@ -31,6 +32,17 @@ app.get('/check', async (req, res) => {
     res.send([{ "message": `data not ready yet; this request will probably take a total of ${timeleft} minutes` }])
   }
     
+});
+
+app.post('/cfdns', async (req, res) => {
+  reset = false
+  result = []
+  let bod = []
+  bod = req.body
+  cfdns(bod, result, reset)
+  res.contentType("application/json")
+  res.set("Content-Disposition", "inline;");
+  res.send({ "message": `thanks, please check back in approximately ${bod.length} minutes` })
 });
 
 app.post('/sitecheck', async (req, res) => {
