@@ -2,7 +2,7 @@ const { chromium } = require("playwright-chromium")
 const chromeLauncher = require('chrome-launcher');
 const lighthouse = require('lighthouse');
 
-module.exports = async function siteCheck (siteList, result, reset) {
+module.exports = async function siteCheck (siteList, result, reset, wss) {
 
   try {
     /** @type {import('playwright-chromium').Browser} */
@@ -14,6 +14,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
     })
 
     for (let i = 0; i < siteList.length; i++) {
+
       if (reset) {
         await browser.close()
         browser = null

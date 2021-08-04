@@ -14,14 +14,13 @@ const requestOptions = {
 
 
 module.exports = async function get_cfs (sites, result, reset) {
+  if (reset) {
+    result = [{ "message": "bot run cancelled." }]
+    reset = false
+    return;
+  }
   try {
     // get cf info
-    if (reset) {
-      result = [{ "message": "bot run cancelled." }]
-      reset = false
-      return;
-    }
-
     let num_calls;
     let cf_info = []
     let cf_names = []
@@ -50,6 +49,11 @@ module.exports = async function get_cfs (sites, result, reset) {
 
     // check dns
     sites.forEach(async site => {
+      if (reset) {
+        result = [{ "message": "bot run cancelled." }]
+        reset = false
+        return;
+      }
       let mx = []
       await dns.resolveMx(site, function (err, addresses) {
         if (addresses) {

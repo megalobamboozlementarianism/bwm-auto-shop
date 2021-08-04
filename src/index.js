@@ -1,4 +1,6 @@
 "use strict";
+const WebSocketServer = require("ws").Server
+const http = require("http")
 const express = require("express")
 // const lighthouse = require('lighthouse');
 const wwwhisper = require('connect-wwwhisper')
@@ -15,8 +17,31 @@ const doLighthouse = require('./doLighthouse');
 const cfdns = require('./checkCF')
 
 
-let result = [];
+// websocket stuff
+var server = http.createServer(app)
+server.listen(port)
+console.log("http server listening on %d", port)
+var wss = new WebSocketServer({ server: server })
+console.log("websocket server created")
 
+wss.on("connection", function (ws) {
+  ws.send(JSON.stringify(['hi']), function () { })
+  // var id = setInterval(function () {
+  //   ws.send(JSON.stringify(['hi']), function () { })
+  // }, 2000)
+
+  // console.log("websocket connection open")
+
+  // ws.on("close", function () {
+  //   console.log("websocket connection closed")
+  //   clearInterval(id)
+  // })
+
+  
+})
+
+// bot data globals
+let result = [];
 let timeleft;
 let reset = false
 
@@ -42,7 +67,7 @@ app.post('/cfdns', async (req, res) => {
   cfdns(bod, result, reset)
   res.contentType("application/json")
   res.set("Content-Disposition", "inline;");
-  res.send({ "message": `thanks, please check back in approximately ${bod.length} minutes` })
+  res.send({ "message": `thanks, please check back in approximately ${bod.length / 10} minutes` })
 });
 
 app.post('/sitecheck', async (req, res) => {
@@ -50,7 +75,7 @@ app.post('/sitecheck', async (req, res) => {
   result = []
   let bod = []
   bod = req.body
-  siteCheck(bod, result, reset)
+  siteCheck(bod, result, reset, wss)
   res.contentType("application/json")
   res.set("Content-Disposition", "inline;");
   res.send({"message": `thanks, please check back in approximately ${bod.length} minutes`})
@@ -103,6 +128,6 @@ app.get('/reset', async (req, res) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}!`);
-});
+// app.listen(port, () => {
+//   console.log(`Listening on port ${port}!`);
+// });
