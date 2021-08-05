@@ -90,6 +90,9 @@ module.exports = async function get_cfs (sites, result, reset) {
           
           // send to results to return to front end
           result.push(records)
+          result.push({
+            "message": `CF / DNS check completed at ${Date()}`
+          })
         }
       });
 

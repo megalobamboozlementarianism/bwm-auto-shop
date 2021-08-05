@@ -16,6 +16,11 @@ const siteCheck = require('./siteCheck');
 const doLighthouse = require('./doLighthouse');
 const cfdns = require('./checkCF')
 
+// bot data globals
+let result = [{ "message": "no data to display" }];
+let timeleft;
+let reset = false
+
 
 // websocket stuff
 var server = http.createServer(app)
@@ -25,25 +30,31 @@ var wss = new WebSocketServer({ server: server })
 console.log("websocket server created")
 
 wss.on("connection", function (ws) {
-  ws.send(JSON.stringify(['hi']), function () { })
-  // var id = setInterval(function () {
-  //   ws.send(JSON.stringify(['hi']), function () { })
-  // }, 2000)
+  console.log("websocket connection established")
+  ws.on("message", (message) => {
+    console.log(`server received: ${message}`);
+  })
+  
+  
+    var id = setInterval(function () {
+      let item = result[result.length - 1]
+      if (item.message) {
+        ws.send(`${item.message}`)
+      } else {
+        ws.send(`currently checking ${result[result.length - 1].data_type} on ${result[result.length - 1].site}`, function () { })
+      }
+    }, 500)
 
-  // console.log("websocket connection open")
+    console.log("websocket connection open")
 
-  // ws.on("close", function () {
-  //   console.log("websocket connection closed")
-  //   clearInterval(id)
-  // })
+    ws.on("close", function () {
+      console.log("websocket connection closed")
+      clearInterval(id)
+    })
 
   
+  
 })
-
-// bot data globals
-let result = [];
-let timeleft;
-let reset = false
 
 app.get('/check', async (req, res) => {
   if (result) {
@@ -61,7 +72,7 @@ app.get('/check', async (req, res) => {
 
 app.post('/cfdns', async (req, res) => {
   reset = false
-  result = []
+  result = [{ "message": `CF & DNS check initiated at ${Date()}` }]
   let bod = []
   bod = req.body
   cfdns(bod, result, reset)
@@ -72,7 +83,7 @@ app.post('/cfdns', async (req, res) => {
 
 app.post('/sitecheck', async (req, res) => {
   reset = false
-  result = []
+  result = [{ "message": `site check initiated at ${Date()}` }]
   let bod = []
   bod = req.body
   siteCheck(bod, result, reset, wss)
@@ -82,6 +93,8 @@ app.post('/sitecheck', async (req, res) => {
 });
 
 app.post('/dolighthouse', async (req, res) => {
+  reset = false
+  result = [{ "message": `lighthouse check initiated at ${Date()}` }]
   let bod = []
   bod = req.body
   doLighthouse(bod, result, reset)
@@ -118,7 +131,7 @@ app.get('/reset', async (req, res) => {
   console.log("canceling current bot run and resetting data")
   try {
     reset = true
-    result = []
+    result = [{ "message": "no data to display" }]
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
     res.send([{ "message": "canceling current bot run and resetting data" }])

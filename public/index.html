@@ -51,7 +51,7 @@
         
         <div class="notification">
             <h1 class="title">Monthly SEO Site Check</h1>
-            <p>Input a JSON array of URLs to scrape the title, H1 and H2 tags, schema, social links, as well as desktop and mobile speed scores.</p>
+            <p>Input a JSON array of URLs (use https://) to scrape the title, H1 and H2 tags, schema, social links, as well as desktop and mobile speed scores.</p>
             <br>
             <div id="file-js-example" class="file has-name">
                 <label class="file-label">
@@ -69,17 +69,21 @@
                     </span>
                 </label>
             </div>
-            <br><button class="button is-info is-invisible" id="sc-check" >check</button>
+            <br>
+            <div class="websocket-test">
+              <h1>Status</h1>
+              <p id='pings'></p>
+            </div>
+            <br><button class="button is-info is-invisible" id="sc-check" >view progress</button>
             <button class="button is-info is-invisible" id="sc-reset" >reset</button>
-            <div id="hlist-results">
+            <div id="hlist-results" style="max-height: 500px; overflow-y: scroll;">
             </div>
         </div>
 
         <div class="notification">
             <h1 class="title">Run Lighthouse</h1>
-            <p>Input a JSON array of URLs to run lighthouse on</p>
-            <br>
-            <br><button class="button is-info is-invisible" id="lh-check" >check</button>
+            <p>Input a JSON array of URLs (use https://) to run lighthouse on</p>
+            <button class="button is-info is-invisible" id="lh-check" >view progress</button>
             <button class="button is-info is-invisible" id="lh-reset" >reset</button>
             <div id="file-js-example-lh" class="file has-name">
                 <label class="file-label">
@@ -96,6 +100,11 @@
                     No file uploaded
                     </span>
                 </label>
+            </div>
+            <br>
+            <div class="websocket-test">
+              <h1>Status</h1>
+              <p id='lh-pings'></p>
             </div>
             <div id="LH-results">
             </div>
@@ -121,14 +130,15 @@
                   </span>
               </label>
           </div>
-          <br><button class="button is-info is-invisible" id="cfdns-check" >check</button>
+          <br>
+          <div class="websocket-test">
+              <h1>Status</h1>
+              <p id='cfdns-pings'></p>
+            </div>
+          <br><button class="button is-info is-invisible" id="cfdns-check" >view progress</button>
           <button class="button is-info is-invisible" id="cfdns-reset" >reset</button>
           <div id="cfdns-results">
           </div>
-        </div>
-        <div class="websocket-test">
-        <h1>Pings</h1>
-        <ul id='pings'></ul>
         </div>
     </div>
     <footer class="footer">
@@ -171,6 +181,13 @@
               const fileNameCFDNS = document.querySelector('#file-js-example-cfdns .file-name');
               fileNameCFDNS.innerHTML = fileInputCFDNS.files[0].name;
               
+              //websocket stuff
+              const host = location.origin.replace(/^http/, 'ws')
+              const ws = new WebSocket(host);
+              ws.onmessage = function (event) {
+                document.querySelector('#cfdns-pings').innerHTML = event.data;
+              };
+
               const CFDNSResults = document.querySelector("#cfdns-results")
               const data = fileInputCFDNS.files[0];
               
@@ -237,11 +254,8 @@
               const host = location.origin.replace(/^http/, 'ws')
               const ws = new WebSocket(host);
               ws.onmessage = function (event) {
-                var li = document.createElement('li');
-                li.innerHTML = JSON.parse(event.data);
-                document.querySelector('#pings').appendChild(li);
+                document.querySelector('#pings').innerHTML = event.data;
               };
-              
               
               const hlistResults = document.querySelector("#hlist-results")
               const data = fileInput.files[0];
@@ -321,6 +335,13 @@
               
               const LHResults = document.querySelector("#LH-results")
               const data = fileInputLH.files[0];
+
+              //websocket stuff
+              const host = location.origin.replace(/^http/, 'ws')
+              const ws = new WebSocket(host);
+              ws.onmessage = function (event) {
+                document.querySelector('#lh-pings').innerHTML = event.data;
+              };
               
               fetch('/dolighthouse', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.

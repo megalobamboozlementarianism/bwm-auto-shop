@@ -68,6 +68,9 @@ module.exports = async function doLighthouse(siteList, result, reset) {
     }
     await chrome.kill()
     chrome = null
+    result.push({
+      "message": `Monthly SEO site check completed at ${Date()}`
+    })
     console.log("data ready to check")
   } catch (err) {
     // res.contentType("text/plain")

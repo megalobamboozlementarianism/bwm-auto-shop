@@ -9,9 +9,6 @@ module.exports = async function siteCheck (siteList, result, reset, wss) {
     let browser = await chromium.launch({
       chromiumSandbox: false
     })
-    result.push({
-      "message": `site check initiated at ${Date()}`
-    })
 
     for (let i = 0; i < siteList.length; i++) {
 
