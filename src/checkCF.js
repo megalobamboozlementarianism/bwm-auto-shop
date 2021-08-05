@@ -62,7 +62,7 @@ module.exports = async function get_cfs (sites, result, reset) {
           mx.push("no mx records found")
         }
       })
-      await dns.resolve4(site, function (err, addresses) {
+      await dns.resolve4(site, async function (err, addresses) {
         let index = cf_names.indexOf(site)
         if (cf_names.includes(site)) {
           let records = {

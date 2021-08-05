@@ -38,10 +38,13 @@ wss.on("connection", function (ws) {
   
     var id = setInterval(function () {
       let item = result[result.length - 1]
+
       if (item.message) {
         ws.send(`${item.message}`)
-      } else {
+      } else if (item.data_type) {
         ws.send(`currently checking ${result[result.length - 1].data_type} on ${result[result.length - 1].site}`, function () { })
+      } else if (item.in_cf) {
+        ws.send(`currently checking CF & DNS on ${result[result.length - 1].site}`)
       }
     }, 500)
 
