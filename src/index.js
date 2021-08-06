@@ -15,6 +15,7 @@ app.use(express.json())
 const siteCheck = require('./siteCheck');
 const doLighthouse = require('./doLighthouse');
 const cfdns = require('./checkCF')
+const addPage = require('./addPage')
 
 // bot data globals
 let result = [{ "message": "no data to display" }];
@@ -52,6 +53,18 @@ app.get('/check', async (req, res) => {
     res.set("Content-Disposition", "inline;");
     res.send([{ "message": `data not ready yet; this request will probably take a total of ${timeleft} minutes` }])
   }
+});
+
+app.post('/addpage', async (req, res) => {
+  console.log("made it into addpage route")
+  reset = false
+  result = [{ "message": `Add Page check initiated at ${Date()}` }]
+  let bod = []
+  bod = req.body
+  addPage(bod, result, reset)
+  res.contentType("application/json")
+  res.set("Content-Disposition", "inline;");
+  res.send({ "message": `thanks, please check back in approximately 2 minutes` })
 });
 
 app.post('/cfdns', async (req, res) => {
