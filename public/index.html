@@ -19,38 +19,48 @@
                 <h1 class="title">
                     BWM Auto Shop
                 </h1>
-                <h2 class="subtitle">
-                    A user interface for Abe's Bots
-                </h2>
+                <h2 class="subtitle">A user interface for Abe's Bots</h2>
+                <br>
+                <br>
+                <p>Depending on the number of sites, each bot can take a little while.</p>
+                <p>When the run is complete there will be a status message with a timestamp like "<em>MY_BOT_RUN</em> completed at Fri Aug 06 2021 14:32:22 GMT-0600 (Mountain Daylight Time)"</p>
             </div>
         </div>
     </section>
     <div class="container pb-5">
 
-        <div class="notification">
-            <h1 class="title">Single-site H Scraper</h1>
-            <p>Input a URL to scrape the H1 and H2 tags for the site (use https://)</p>
-            <br>
-            <div class="field has-addons">
-                <div class="control is-expanded">
-                    <input class="input is-fullwidth" type="url" value="https://bigwestplayground.com/theultimatic"
-                        id="h-url">
-                </div>
-                <div class="control">
-                    <a class="button is-info" id="hscrape-run">
-                        Scrape H tags
-                    </a>
-                </div>
-            </div>
-            <div id="hscrape-results">
-                <div id="h1-results"></div>
-                <div id="h2-results"></div>
-            </div>
-        </div>
+      <div class="notification">
+        <label for="bot-select">Choose a bot &#x1F916; </label>
+        <select name="bots" id="bot-select">
+            <option value="none">-- &#x1F916; &#x1F916; &#x1F916; &#x1F916; &#x1F916; &#x1F916; &#x1F916; --</option>
+            <option value="hscrape">Single-site H Scraper</option>
+            <option value="seositecheck">SEO Site Check</option>
+            <option value="lighthouse">Run Lighthouse</option>
+            <option value="cfdns">Check Cloudflare and DNS</option>
+        </select>
+
+      </div>
+      
+      <div class="notification hscrape" style="display: none;">
+          <h1 class="title">Single-site H Scraper</h1>
+          <p>Input a URL to scrape the H1 and H2 tags for the site (use https://)</p>
+          <br>
+          <div class="field has-addons">
+              <div class="control is-expanded">
+                  <input class="input is-fullwidth" type="url" value="https://bigwestplayground.com/theultimatic"
+                      id="h-url">
+              </div>
+              <div class="control">
+                  <a class="button is-info" id="hscrape-run">
+                      Scrape H tags
+                  </a>
+              </div>
+          </div>
+      </div>
 
         
-        <div class="notification">
-            <h1 class="title">Monthly SEO Site Check</h1>
+        <div class="notification seositecheck" style="display: none;">
+            <h1 class="title">SEO Site Check</h1>
             <p>Input a JSON array of URLs (use https://) to scrape the title, H1 and H2 tags, schema, social links, as well as desktop and mobile speed scores.</p>
             <br>
             <div id="file-js-example" class="file has-name">
@@ -69,18 +79,9 @@
                     </span>
                 </label>
             </div>
-            <br>
-            <div class="websocket-test">
-              <h1>Status</h1>
-              <p id='pings'></p>
-            </div>
-            <button class="button is-info is-invisible" id="sc-check" >view progress</button>
-            <button class="button is-info is-invisible" id="sc-reset" >reset</button>
-            <div id="hlist-results" style="max-height: 500px; overflow-y: scroll;">
-            </div>
         </div>
 
-        <div class="notification">
+        <div class="notification lighthouse" style="display: none;">
             <h1 class="title">Run Lighthouse</h1>
             <p>Input a JSON array of URLs (use https://) to run lighthouse on</p>
             <button class="button is-info is-invisible" id="lh-check" >view progress</button>
@@ -101,16 +102,9 @@
                     </span>
                 </label>
             </div>
-            <br>
-            <div class="websocket-test">
-              <h1>Status</h1>
-              <p id='lh-pings'></p>
-            </div>
-            <div id="LH-results">
-            </div>
         </div>
 
-        <div class="notification">
+        <div class="notification cfdns" style="display: none;">
           <h1 class="title">Check Cloudflare and DNS</h1>
           <p>Input a JSON array of domains (no https://) to get the cloudflare status and DNS records</p>
           <br>
@@ -130,17 +124,17 @@
                   </span>
               </label>
           </div>
-          <br>
-          <div class="websocket-test">
-              <h1>Status</h1>
-              <p id='cfdns-pings'></p>
-            </div>
-          <br><button class="button is-info is-invisible" id="cfdns-check" >view progress</button>
-          <button class="button is-info is-invisible" id="cfdns-reset" >reset</button>
-          <div id="cfdns-results">
-          </div>
-        </div>
     </div>
+
+    <div class="notification">
+      <div class="websocket-test">
+        <h1 class="title">Status</h1>
+        <p id='pings'></p>
+      </div>
+      <br>
+      <div id="results-container" style="max-height: 500px; overflow-y: scroll;"></div>
+    </div>
+
     <footer class="footer">
         <div class="content has-text-centered">
             <p>
@@ -150,47 +144,77 @@
     </footer>
     <script>
         (() => {
-          // cfdns scraper
-          const checkBtnCFDNS = document.querySelector("#cfdns-check")
-          checkBtnCFDNS.addEventListener("click", (e) => {
-            const cfdnsResults = document.querySelector("#cfdns-results")
+          // start things off by resetting data
+          fetch(`/reset`)
+          .then(response => response.json())
+          .then(data => {
+            resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+          }) 
+          //websocket stuff
+            const status = document.querySelector('#pings')
+            const host = location.origin.replace(/^http/, 'ws')
+            const ws = new WebSocket(host);
+            ws.onmessage = function (event) {
+            let obj = JSON.parse((event.data))
+            let last_item = obj[obj.length - 1]
+            if (last_item.message) {
+              status.innerHTML = `${last_item.message}`
+            } else if (last_item.data_type) {
+              status.innerHTML = `currently checking ${last_item.data_type} on ${last_item.site}`
+            } else if (item.in_cf) {
+              status.innerHTML = `currently checking CF & DNS on ${last_item.site}`
+            }
+              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(obj, null, 2)}</pre>`
+            };
+          
+          // view progress and reset buttons
+/*          const checkBtn = document.querySelector("#check")
+          checkBtn.addEventListener("click", (e) => {
             fetch(`/check`)
             .then(response => response.json())
             .then(data => {
-              cfdnsResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-              resetBtnCFDNS.classList.remove('is-invisible')
+              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
             }) 
           })
-
-          const resetBtnCFDNS = document.querySelector("#cfdns-reset")  
-          resetBtnCFDNS.addEventListener("click", (e) => {
-            const cfdnsresults = document.querySelector("#cfdns-results")
+          const resetBtn = document.querySelector("#reset")  
+          resetBtn.addEventListener("click", (e) => {
             fetch(`/reset`)
             .then(response => response.json())
             .then(data => {
-              cfdnsresults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
             }) 
-          }) 
+          }) */
 
+          // bot select menu
+          const botSelect = document.querySelector("#bot-select")
+          const botContainer = document.querySelector('#bot-container');
+          const resultsContainer = document.querySelector("#results-container")
+          const bot_names = ["hscrape", "seositecheck", "lighthouse", "cfdns"]
+          botSelect.addEventListener("change", (event) => {
+            fetch(`/reset`)
+            .then(response => response.json())
+            .then(data => {
+              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
+            }) 
+            bot_names.forEach( (elem) => {
+              if (event.target.value === elem) {
+                document.querySelector(`.${elem}`).style.display = "block"
+              } else {
+                document.querySelector(`.${elem}`).style.display = "none"
+              }
+            })
+          })
+
+          // CF & DNS checker
           const fileInputCFDNS = document.querySelector('#file-js-example-cfdns input[type=file]');
           fileInputCFDNS.addEventListener("click", (e) => {
             fileInputCFDNS.value = ''
           })
           fileInputCFDNS.onchange = () => {
-              if (fileInputCFDNS.files.length > 0) {
+            if (fileInputCFDNS.files.length > 0) {
               const fileNameCFDNS = document.querySelector('#file-js-example-cfdns .file-name');
-              fileNameCFDNS.innerHTML = fileInputCFDNS.files[0].name;
-              
-              //websocket stuff
-              const host = location.origin.replace(/^http/, 'ws')
-              const ws = new WebSocket(host);
-              ws.onmessage = function (event) {
-                document.querySelector('#cfdns-pings').innerHTML = event.data;
-              };
-
-              const CFDNSResults = document.querySelector("#cfdns-results")
               const data = fileInputCFDNS.files[0];
-              
+              fileNameCFDNS.innerHTML = data.name;              
               fetch('/cfdns', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 mode: 'cors', // no-cors, *cors, same-origin
@@ -206,13 +230,12 @@
               })
               .then(response => response.json())
               .then(data => {
-                CFDNSResults.innerHTML += `<br><br><strong>${data.message}</strong>`;
-                checkBtnCFDNS.classList.remove('is-invisible')
+                resultsContainer.innerHTML += `<br><br><strong>${data.message}</strong>`;
               })
               .catch((error) => {
                 console.error('Error:', JSON.stringify(error));
               });
-              }
+            }
           }
 
             // Hscraper
@@ -221,128 +244,55 @@
               const hscrapeUrl = document.querySelector("#h-url")
               const searchParams = new URLSearchParams()
               searchParams.set("url", hscrapeUrl.value)
-
-              const h1Results = document.querySelector("#h1-results")
-              const h2Results = document.querySelector("#h2-results")
-              h1Results.innerHTML = "...fetching H1s"
-              h2Results.innerHTML = "...fetching H2s"
               fetch(`/hscrape?${searchParams.toString()}`)
               .then(response => {
-                  h1Results.innerHTML = "<strong>H1s</strong>"
-                  h2Results.innerHTML = "<strong>H2s</strong>"
                   return response.json()
               })
               .then(function(data) {
-                  console.log(JSON.stringify(data))
-                  data["h1s"].forEach(elem => h1Results.innerHTML += `<br> ${elem}`)
-                  data["h2s"].forEach(elem => h2Results.innerHTML += `<br> ${elem}`)
+                resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
               })
-              
           })
 
-            // sitecheck scraper
+          // sitecheck scraper
           const fileInput = document.querySelector('#file-js-example input[type=file]');
           fileInput.addEventListener("click", (e) => {
             fileInput.value = ''
           })
           fileInput.onchange = () => {
-              if (fileInput.files.length > 0) {
-              const fileName = document.querySelector('#file-js-example .file-name');
-              fileName.innerHTML = fileInput.files[0].name;
-
-              //websocket stuff
-              const host = location.origin.replace(/^http/, 'ws')
-              const ws = new WebSocket(host);
-              ws.onmessage = function (event) {
-                document.querySelector('#pings').innerHTML = event.data;
-              };
-              
-              const hlistResults = document.querySelector("#hlist-results")
-              const data = fileInput.files[0];
-              
-              fetch('/sitecheck', {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                mode: 'cors', // no-cors, *cors, same-origin
-                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: 'same-origin', // include, *same-origin, omit
-                headers: {
-                  'Content-Type': 'application/json'
-                  // 'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                redirect: 'follow', // manual, *follow, error
-                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                body: data // body data type must match "Content-Type" header
-              })
-              .then(response => response.json())
-              .then(data => {
-                hlistResults.innerHTML += `<br><br><strong>${data.message}</strong>`;
-                checkBtn.classList.remove('is-invisible')
-              })
-              .catch((error) => {
-                console.error('Error:', JSON.stringify(error));
-              });
-              }
+            if (fileInput.files.length > 0) {
+            const fileName = document.querySelector('#file-js-example .file-name');
+            fileName.innerHTML = fileInput.files[0].name;           
+            const data = fileInput.files[0];
+            fetch('/sitecheck', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              body: data // body data type must match "Content-Type" header
+            })
+            .then(response => response.json())
+            .then(data => {
+              resultsContainer.innerHTML += `<br><br><strong>${data.message}</strong>`;
+            })
+            .catch((error) => {
+              console.error('Error:', JSON.stringify(error));
+            });
+            }
           }
 
-          const checkBtn = document.querySelector("#sc-check")
-          checkBtn.addEventListener("click", (e) => {
-            const hlistResults = document.querySelector("#hlist-results")
-            fetch(`/check`)
-            .then(response => response.json())
-            .then(data => {
-              hlistResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-              resetBtn.classList.remove('is-invisible')
-            }) 
-          })
-
-          const resetBtn = document.querySelector("#sc-reset")  
-          resetBtn.addEventListener("click", (e) => {
-            const hlistResults = document.querySelector("#hlist-results")
-            const LHResults = document.querySelector("##LH-results")
-            fetch(`/reset`)
-            .then(response => response.json())
-            .then(data => {
-              hlistResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-            }) 
-          }) 
-
           // lighthouse
-           const checkBtnLH = document.querySelector("#lh-check")
-          checkBtnLH.addEventListener("click", (e) => {
-            const LHResults = document.querySelector("#LH-results")
-            fetch(`/check`)
-            .then(response => response.json())
-            .then(data => {
-              LHResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-              lhResetBtn.classList.remove('is-invisible')
-            }) 
-          })
-          const lhResetBtn = document.querySelector("#lh-reset")  
-          lhResetBtn.addEventListener("click", (e) => {
-            const LHResults = document.querySelector("#LH-results")
-            fetch(`/reset`)
-            .then(response => response.json())
-            .then(data => {
-              LHResults.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-            }) 
-          }) 
-
           const fileInputLH = document.querySelector('#file-js-example-lh input[type=file]');
           fileInputLH.onchange = () => {
-              if (fileInputLH.files.length > 0) {
+            if (fileInputLH.files.length > 0) {
               const fileName = document.querySelector('#file-js-example-lh .file-name-lh');
               fileName.innerHTML = fileInputLH.files[0].name;
-              
-              const LHResults = document.querySelector("#LH-results")
-              const data = fileInputLH.files[0];
-
-              //websocket stuff
-              const host = location.origin.replace(/^http/, 'ws')
-              const ws = new WebSocket(host);
-              ws.onmessage = function (event) {
-                document.querySelector('#lh-pings').innerHTML = event.data;
-              };
-              
+              const lhList = fileInputLH.files[0];
               fetch('/dolighthouse', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 mode: 'cors', // no-cors, *cors, same-origin
@@ -354,12 +304,11 @@
                 },
                 redirect: 'follow', // manual, *follow, error
                 referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                body: data // body data type must match "Content-Type" header
+                body: lhList // body data type must match "Content-Type" header
               })
               .then(response => response.json())
               .then(data => {
-                LHResults.innerHTML += `<br><br><strong>${data.message}</strong>`;
-                checkBtnLH.classList.remove('is-invisible')
+                resultsContainer.innerHTML += `<br><br><strong>${data.message}</strong>`;
               })
               .catch((error) => {
                 console.error('Error:', JSON.stringify(error));

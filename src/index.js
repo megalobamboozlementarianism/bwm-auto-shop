@@ -21,42 +21,25 @@ let result = [{ "message": "no data to display" }];
 let timeleft;
 let reset = false
 
-
 // websocket stuff
 var server = http.createServer(app)
 server.listen(port)
 console.log("http server listening on %d", port)
 var wss = new WebSocketServer({ server: server })
 console.log("websocket server created")
-
 wss.on("connection", function (ws) {
   console.log("websocket connection established")
   ws.on("message", (message) => {
     console.log(`server received: ${message}`);
   })
-  
-  
-    var id = setInterval(function () {
-      let item = result[result.length - 1]
-
-      if (item.message) {
-        ws.send(`${item.message}`)
-      } else if (item.data_type) {
-        ws.send(`currently checking ${result[result.length - 1].data_type} on ${result[result.length - 1].site}`, function () { })
-      } else if (item.in_cf) {
-        ws.send(`currently checking CF & DNS on ${result[result.length - 1].site}`)
-      }
-    }, 500)
-
-    console.log("websocket connection open")
-
-    ws.on("close", function () {
-      console.log("websocket connection closed")
-      clearInterval(id)
-    })
-
-  
-  
+  var id = setInterval(function () {
+    ws.send(JSON.stringify(result, null, 2))
+  }, 500)
+  console.log("websocket connection open")
+  ws.on("close", function () {
+    console.log("websocket connection closed")
+    clearInterval(id)
+  })
 })
 
 app.get('/check', async (req, res) => {
@@ -64,13 +47,11 @@ app.get('/check', async (req, res) => {
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
     res.send(result)
-
   } else {
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
     res.send([{ "message": `data not ready yet; this request will probably take a total of ${timeleft} minutes` }])
   }
-    
 });
 
 app.post('/cfdns', async (req, res) => {
@@ -108,6 +89,8 @@ app.post('/dolighthouse', async (req, res) => {
 });
 
 app.get('/hscrape', async (req, res) => {
+  reset = false
+  result = [{ "message": `H scrape initiated at ${Date()}` }]
   const url = req.query.url
   console.log(`Incoming request for URL '${url}'`)
   /** @type {import('playwright-chromium').Browser} */
@@ -121,9 +104,25 @@ app.get('/hscrape', async (req, res) => {
     await page.goto(url)
     const h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
     const h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
+    let done = false
+    h1s.forEach(elem => {
+      result.push({
+        "site": url,
+        "data_type": "h1",
+        "datum": elem
+      })
+    })
+    h2s.forEach(elem => {
+      result.push({
+        "site": url,
+        "data_type": "h2",
+        "datum": elem
+      })
+    })
+    result.push({ "message": `H scrape completed at ${Date()}` })
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
-    res.send({"h1s": h1s, "h2s": h2s })
+    res.send(result)
   } catch (err) {
     res.status(500).send(`Something went wrong: ${err}`)
   }
@@ -137,7 +136,7 @@ app.get('/reset', async (req, res) => {
     result = [{ "message": "no data to display" }]
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
-    res.send([{ "message": "canceling current bot run and resetting data" }])
+    res.send(result)
   } catch (err) {
     res.status(500).send(`Something went wrong: ${err}`)
   }

@@ -198,7 +198,7 @@ module.exports = async function siteCheck (siteList, result, reset, wss) {
     chrome = null;
 
     result.push({
-      "message": `Monthly SEO site check completed at ${Date()}`
+      "message": `SEO site check completed at ${Date()}`
     })
     console.log("data ready to check")
   } catch (err) {
