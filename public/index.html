@@ -128,11 +128,41 @@
 
       <div class="notification json2xlsx" style="display: none;">
           <h1 class="title">Convert JSON to xlsx</h1>
-          <p>paste your json in the box, hit the button, recieve an xlsx back</p>
+          <p>Paste your JSON in the box, hit the button, recieve an xlsx back</p>
+          <br>
+          <p>Note: Requires a JSON array [] of objects {}, with each object having the same set of keys (example below).
+          The column headers of the resulting xlsx will be the names of the keys.</p>
+          <pre>                      (example)
+[
+  {
+    "site": "https://mysite1.com/",
+    "performance": 23,
+    "bestPractices": 73,
+    "accessibility": 97,
+    "pwa": 50,
+    "seo": 79
+  },
+  {
+    "site": "https://mysite2.com/",
+    "performance": 37,
+    "bestPractices": 73,
+    "accessibility": 77,
+    "pwa": 42,
+    "seo": 82
+  },
+  {
+    "site": "https://mysite3.com",
+    "performance": 55.00000000000001,
+    "bestPractices": 73,
+    "accessibility": 93,
+    "pwa": 50,
+    "seo": 93
+  }
+]         </pre>
           <br>
           <div id="paste-json">
               <form id="paste-json-form">
-                <textarea id="paste-json-input" rows=7 cols=50 value="" placeholder="paste json here"></textarea>
+                <textarea class="textarea" id="paste-json-input" rows=7 cols=50 value="" placeholder="paste json here"></textarea>
                 <input type="submit" name="submit" value="upload"></input>
               </form>
           </div>
@@ -162,7 +192,7 @@
             <br>
             <div id="paste-list">
               <form id="paste-form">
-                <textarea id="paste-input" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
+                <textarea class="textarea" id="paste-input" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
                 <input type="submit" name="submit" value="upload"></input>
               </form>
             </div>
@@ -191,7 +221,7 @@
             </div>
             <div id="paste-list-lh">
               <form id="paste-form-lh">
-                <textarea id="paste-input-lh" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
+                <textarea class="textarea" id="paste-input-lh" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
                 <input type="submit" name="submit" value="upload"></input>
               </form>
             </div>
@@ -219,7 +249,7 @@
           </div>
           <div id="paste-list-cfdns">
               <form id="paste-form-cfdns">
-                <textarea id="paste-input-cfdns" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
+                <textarea class="textarea" id="paste-input-cfdns" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
                 <input type="submit" name="submit" value="upload"></input>
               </form>
           </div>
