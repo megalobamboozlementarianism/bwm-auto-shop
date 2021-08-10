@@ -11,9 +11,7 @@ const requestOptions = {
   redirect: 'follow'
 };
 
-
-
-module.exports = async function get_cfs (sites, result, reset) {
+module.exports = async function cfdns (sites, result, reset) {
   if (reset) {
     result = [{ "message": "bot run cancelled." }]
     reset = false
@@ -46,60 +44,53 @@ module.exports = async function get_cfs (sites, result, reset) {
         })
         .catch(error => console.log('error', error));
     }
-
     // check dns
-    sites.forEach(async site => {
+    for (let i = 0; i < sites.length; i++){
       if (reset) {
         result = [{ "message": "bot run cancelled." }]
         reset = false
         return;
       }
       let mx = []
-      await dns.resolveMx(site, function (err, addresses) {
+      await dns.resolveMx(sites[i], function (err, addresses) {
         if (addresses) {
-          addresses.forEach( elem => mx.push(elem))
+          addresses.forEach(elem => mx.push(elem))
         } else {
           mx.push("no mx records found")
         }
       })
-      await dns.resolve4(site, async function (err, addresses) {
-        let index = cf_names.indexOf(site)
-        if (cf_names.includes(site)) {
-          let records = {
-            "site": site,
+      let records = []
+      await dns.resolve4(sites[i], async function (err, addresses) {
+        let index = cf_names.indexOf(sites[i])
+        if (cf_names.includes(sites[i])) {
+          records.push({
+            "site": sites[i],
             "ip_addr": addresses,
             "in_cf": "yes",
             "name_servers": cf_info[index].name_servers,
             "original_name_servers": cf_info[index].original_name_servers,
             "original_registrar": cf_info[index].original_registrar,
             "mx records": mx
-          }
-          
-          // send to results to return to front end
-          result.push(records)
+          })
         } else {
-          let records = {
-            "site": site,
+          records.push({
+            "site": sites[i],
             "ip_addr": addresses,
             "in_cf": "no",
             "name_servers": cf_info[index] || `Pointed IP: ${addresses}`,
             "original_name_servers": cf_info[index] || `Pointed IP: ${addresses}`,
             "original_registrar": cf_info[index] || `data not available`,
             "mx records": mx
-          }
-          
-          // send to results to return to front end
-          result.push(records)
-          result.push({
-            "message": `CF / DNS check completed at ${Date()}`
           })
         }
       });
-
+      result.push(records)
+    }
+    result.push({
+      "message": `CF / DNS check completed at ${Date()}`
     })
   } catch (error) {
     console.log(`error: ${err}`)
   }
-  
 }
 

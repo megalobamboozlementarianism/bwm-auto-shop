@@ -3,7 +3,6 @@ const chromeLauncher = require('chrome-launcher');
 const lighthouse = require('lighthouse');
 
 module.exports = async function siteCheck (siteList, result, reset) {
-
   try {
     /** @type {import('playwright-chromium').Browser} */
     let browser = await chromium.launch({
@@ -203,7 +202,6 @@ module.exports = async function siteCheck (siteList, result, reset) {
     console.log("data ready to check")
   } catch (err) {
     result.push({
-
       "site": 'n/a',
       "data_type": "general error",
       "datum": err

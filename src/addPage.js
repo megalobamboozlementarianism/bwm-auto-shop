@@ -46,9 +46,13 @@ module.exports = async function addPage(info, result, reset) {
     await navigationPromise
     await page.click('.inside > #submitpost > #major-publishing-actions #publish')
     const success = await page.waitForSelector('text="Page published."')
-    const permalink = await (await page.waitForSelector('#sample-permalink')).innerText()
+    const pagestatus = await page.waitForSelector('#post-status-display')
+    console.log(pagestatus.innerText())
+    const permalink = await page.waitForSelector('#sample - permalink > a')
+    const permalinkURL = await permalink.getAttribute('href')
+    console.log(permalinkURL)
     if (success) {
-      result.push({ "message": `page ${permalink} created on ${clientURL} at ${Date()}` })
+      result.push({ "message": `page ${permalinkURL} created at ${Date()}` })
     }
     await page.close();
     page = null

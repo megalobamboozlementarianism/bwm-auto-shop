@@ -56,9 +56,8 @@ app.get('/check', async (req, res) => {
 });
 
 app.post('/addpage', async (req, res) => {
-  console.log("made it into addpage route")
   reset = false
-  result = [{ "message": `Add Page check initiated at ${Date()}` }]
+  result = [{ "message": `Add Page initiated at ${Date()}` }]
   let bod = []
   bod = req.body
   addPage(bod, result, reset)
@@ -83,7 +82,7 @@ app.post('/sitecheck', async (req, res) => {
   result = [{ "message": `site check initiated at ${Date()}` }]
   let bod = []
   bod = req.body
-  siteCheck(bod, result, reset, wss)
+  siteCheck(bod, result, reset)
   res.contentType("application/json")
   res.set("Content-Disposition", "inline;");
   res.send({"message": `thanks, please check back in approximately ${bod.length} minutes`})

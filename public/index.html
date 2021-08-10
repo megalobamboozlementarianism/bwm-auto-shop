@@ -17,37 +17,37 @@
       }
 
       @keyframes color-me-in {
-        0% {
+        100% {
           background: white;
         }
-        10% {
+        90% {
           background: red;
         }
-        20% {
+        80% {
           background: #FFA500;
         }
-        30% {
+        70% {
           background: yellow;
         }
-        40% {
+        60% {
           background: green;
         }
         50% {
           background: blue;
         }
-        60% {
+        40% {
           background: #4B0082;
         }
-        70% {
+        30% {
           background: #8F00FF;
         }
-        80% {
+        20% {
           background: #7f1ae5;
         }
-        90% {
+        10% {
           background: black;
         }
-        100% {
+        0% {
           background: white;
         }
       }
@@ -81,7 +81,6 @@
             <option value="cfdns">Check Cloudflare and DNS</option>
             <option value="addpage">Add Page to Client Site</option>
         </select>
-
       </div>
       
       <div class="notification hscrape" style="display: none;">
@@ -103,7 +102,7 @@
 
       <div class="notification addpage" style="display: none;">
           <h1 class="title">Add a page to a WP site</h1>
-          <p>Input the url of the site, the page title, and the content as an html string</p>
+          <p>Input the url of the site, the page title, and the content as html</p>
           <br>
           <div class="field has-addons">
               <div class="control is-expanded">
@@ -129,7 +128,7 @@
         
         <div class="notification seositecheck" style="display: none;">
             <h1 class="title">SEO Site Check</h1>
-            <p>Input a JSON array of URLs (use https://) to scrape the title, H1 and H2 tags, schema, social links, as well as desktop and mobile speed scores.</p>
+            <p>Upload a JSON array of URLs, or paste a list of URLs (use https://) to scrape the title, H1 and H2 tags, schema, social links, as well as desktop and mobile speed scores.</p>
             <br>
             <div id="file-js-example" class="file has-name">
                 <label class="file-label">
@@ -147,11 +146,18 @@
                     </span>
                 </label>
             </div>
+            <br>
+            <div id="paste-list">
+              <form id="paste-form">
+                <textarea id="paste-input" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
+                <input type="submit" name="submit" value="upload"></input>
+              </form>
+            </div>
         </div>
 
         <div class="notification lighthouse" style="display: none;">
             <h1 class="title">Run Lighthouse</h1>
-            <p>Input a JSON array of URLs (use https://) to run lighthouse on</p>
+            <p>Upload a JSON array of URLs, or paste a list of URLs (use https://) to run lighthouse on</p>
             <button class="button is-info is-invisible" id="lh-check" >view progress</button>
             <button class="button is-info is-invisible" id="lh-reset" >reset</button>
             <div id="file-js-example-lh" class="file has-name">
@@ -170,11 +176,17 @@
                     </span>
                 </label>
             </div>
+            <div id="paste-list-lh">
+              <form id="paste-form-lh">
+                <textarea id="paste-input-lh" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
+                <input type="submit" name="submit" value="upload"></input>
+              </form>
+            </div>
         </div>
 
         <div class="notification cfdns" style="display: none;">
           <h1 class="title">Check Cloudflare and DNS</h1>
-          <p>Input a JSON array of domains (no https://) to get the cloudflare status and DNS records</p>
+          <p>Upload a JSON array of domains, or paste a list of domains (no https://) to get the cloudflare status and DNS records</p>
           <br>
           <div id="file-js-example-cfdns" class="file has-name">
               <label class="file-label">
@@ -192,12 +204,19 @@
                   </span>
               </label>
           </div>
+          <div id="paste-list-cfdns">
+              <form id="paste-form-cfdns">
+                <textarea id="paste-input-cfdns" rows=7 cols=50 value="" placeholder="paste urls here, 1 per line"></textarea>
+                <input type="submit" name="submit" value="upload"></input>
+              </form>
+          </div>
     </div>
 
     <div class="notification">
       <div class="websocket-test">
         <h1 class="title">Status</h1>
         <p id='pings'></p>
+        <button id="copy">copy results to clipboard</button>
       </div>
       <br>
       <div id="results-container" style="max-height: 500px; overflow-y: scroll;"></div>
@@ -212,6 +231,8 @@
     </footer>
     <script>
         (() => {
+          const resultsContainer = document.querySelector("#results-container")
+          const inputContainer = document.querySelector("#input-container")
           // start things off by resetting data
           fetch(`/reset`)
           .then(response => response.json())
@@ -232,31 +253,12 @@
             } else if (item.in_cf) {
               status.innerHTML = `currently checking CF & DNS on ${last_item.site}`
             }
-              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(obj, null, 2)}</pre>`
+              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(obj, null, 2)}</pre>` 
             };
-          
-          // view progress and reset buttons
-/*          const checkBtn = document.querySelector("#check")
-          checkBtn.addEventListener("click", (e) => {
-            fetch(`/check`)
-            .then(response => response.json())
-            .then(data => {
-              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-            }) 
-          })
-          const resetBtn = document.querySelector("#reset")  
-          resetBtn.addEventListener("click", (e) => {
-            fetch(`/reset`)
-            .then(response => response.json())
-            .then(data => {
-              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
-            }) 
-          }) */
 
           // bot select menu
           const botSelect = document.querySelector("#bot-select")
           const botContainer = document.querySelector('#bot-container');
-          const resultsContainer = document.querySelector("#results-container")
           const bot_names = ["hscrape", "seositecheck", "lighthouse", "cfdns", "addpage"]
           botSelect.addEventListener("change", (event) => {
             fetch(`/reset`)
@@ -273,9 +275,14 @@
             })
           })
 
+          // copy results to clipboard
+          const copyBtn = document.querySelector("#copy")
+          copyBtn.addEventListener("click", (e) => {
+            navigator.clipboard.writeText(resultsContainer.innerText)
+          })
+
           // addpage
           const addpageBtn = document.querySelector("#addpage-run")
-
           addpageBtn.addEventListener("click", (e) => {
             const addPageUrl = document.querySelector("#addpage-url")
             const addPageTitle = document.querySelector("#addpage-title")
@@ -335,6 +342,35 @@
               });
             }
           }
+          // paste version
+          const pasteFormCFDNS = document.querySelector('#paste-form-cfdns')
+          const pasteInputCFDNS =  document.querySelector('#paste-input-cfdns')
+          pasteFormCFDNS.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let input = pasteInputCFDNS.value 
+            let urls = input.split('\n')
+            let data = JSON.stringify(urls)
+            fetch('/cfdns', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              body: data // body data type must match "Content-Type" header
+            })
+            .then(response => response.json())
+            .then(data => {
+              resultsContainer.innerHTML += `<br><br><strong>${data.message}</strong>`;
+            })
+            .catch((error) => {
+              console.error('Error:', JSON.stringify(error));
+            });
+          })
 
             // Hscraper
           const hscrapeBtn = document.querySelector("#hscrape-run")
@@ -353,6 +389,7 @@
 
           // sitecheck scraper
           const fileInput = document.querySelector('#file-js-example input[type=file]');
+          // file input version
           fileInput.addEventListener("click", (e) => {
             fileInput.value = ''
           })
@@ -383,6 +420,35 @@
             });
             }
           }
+          // paste-a-list version
+          const pasteForm = document.querySelector('#paste-form')
+          const pasteInput =  document.querySelector('#paste-input')
+          pasteForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let input = pasteInput.value 
+            let urls = input.split('\n')
+            let data = JSON.stringify(urls)
+            fetch('/sitecheck', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              body: data // body data type must match "Content-Type" header
+            })
+            .then(response => response.json())
+            .then(data => {
+              resultsContainer.innerHTML += `<br><br><strong>${data.message}</strong>`;
+            })
+            .catch((error) => {
+              console.error('Error:', JSON.stringify(error));
+            });
+          })
 
           // lighthouse
           const fileInputLH = document.querySelector('#file-js-example-lh input[type=file]');
@@ -413,6 +479,35 @@
               });
             }
           }
+          // paste version
+          const pasteFormLH = document.querySelector('#paste-form-lh')
+          const pasteInputLH =  document.querySelector('#paste-input-lh')
+          pasteFormLH.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let input = pasteInputLH.value 
+            let urls = input.split('\n')
+            let data = JSON.stringify(urls)
+            fetch('/dolighthouse', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              body: data // body data type must match "Content-Type" header
+            })
+            .then(response => response.json())
+            .then(data => {
+              resultsContainer.innerHTML += `<br><br><strong>${data.message}</strong>`;
+            })
+            .catch((error) => {
+              console.error('Error:', JSON.stringify(error));
+            });
+          })
         })()
     </script>
 
