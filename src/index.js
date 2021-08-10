@@ -1,7 +1,9 @@
 "use strict";
 const WebSocketServer = require("ws").Server
-const http = require("http")
-const express = require("express")
+const http = require("http");
+const express = require("express");
+const json2xls = require("json2xls");
+const fs = require("fs");
 // const lighthouse = require('lighthouse');
 const wwwhisper = require('connect-wwwhisper')
 const { chromium } = require("playwright-chromium")
@@ -11,11 +13,13 @@ const app = express()
 app.use(wwwhisper())
 app.use(express.static("./public"))
 app.use(express.json())
+app.use(json2xls.middleware);
 
 const siteCheck = require('./siteCheck');
 const doLighthouse = require('./doLighthouse');
 const cfdns = require('./checkCF')
 const addPage = require('./addPage')
+const jsonToXlsx = require('./jsonToXlsx')
 
 // bot data globals
 let result = [{ "message": "no data to display" }];
@@ -53,6 +57,23 @@ app.get('/check', async (req, res) => {
     res.set("Content-Disposition", "inline;");
     res.send([{ "message": `data not ready yet; this request will probably take a total of ${timeleft} minutes` }])
   }
+});
+
+app.post('/json2xlsx', async (req, res) => {
+  reset = false
+  result = [{ "message": `JSON to xlsx initiated at ${Date()}` }]
+  let bod = []
+  bod = req.body
+  var xlsx = json2xls(bod);
+
+  fs.writeFileSync('./data.xlsx', xlsx, 'binary');
+
+  res.setHeader('Content-disposition', 'attachment; filename=data.xlsx');
+  res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  await res.download("." + '/data.xlsx');
+
+  // fs.unlinkSync('./data.xlsx')
+
 });
 
 app.post('/addpage', async (req, res) => {

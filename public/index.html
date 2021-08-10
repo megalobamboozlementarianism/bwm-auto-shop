@@ -80,6 +80,7 @@
             <option value="lighthouse">Run Lighthouse</option>
             <option value="cfdns">Check Cloudflare and DNS</option>
             <option value="addpage">Add Page to Client Site</option>
+            <option value="json2xlsx">Convert JSON to Xlxs</option>
         </select>
       </div>
       
@@ -122,6 +123,18 @@
                       add page
                   </a>
               </div>
+          </div>
+      </div>
+
+      <div class="notification json2xlsx" style="display: none;">
+          <h1 class="title">Convert JSON to xlsx</h1>
+          <p>paste your json in the box, hit the button, recieve an xlsx back</p>
+          <br>
+          <div id="paste-json">
+              <form id="paste-json-form">
+                <textarea id="paste-json-input" rows=7 cols=50 value="" placeholder="paste json here"></textarea>
+                <input type="submit" name="submit" value="upload"></input>
+              </form>
           </div>
       </div>
 
@@ -259,7 +272,7 @@
           // bot select menu
           const botSelect = document.querySelector("#bot-select")
           const botContainer = document.querySelector('#bot-container');
-          const bot_names = ["hscrape", "seositecheck", "lighthouse", "cfdns", "addpage"]
+          const bot_names = ["hscrape", "seositecheck", "lighthouse", "cfdns", "addpage", "json2xlsx"]
           botSelect.addEventListener("change", (event) => {
             fetch(`/reset`)
             .then(response => response.json())
@@ -279,6 +292,36 @@
           const copyBtn = document.querySelector("#copy")
           copyBtn.addEventListener("click", (e) => {
             navigator.clipboard.writeText(resultsContainer.innerText)
+          })
+
+          // json 2 xlsx converter
+          const pasteJsonForm = document.querySelector('#paste-json-form')
+          const pasteJsonInput =  document.querySelector('#paste-json-input')
+          const downloadXlsx = document.querySelector("#downloadxlsx")
+          pasteJsonForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let input = pasteJsonInput.value 
+            fetch('/json2xlsx', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              body: input // body data type must match "Content-Type" header
+            })
+            .then(response => response.blob())
+            .then( blob => {
+              var file = window.URL.createObjectURL(blob);
+              window.location.assign(file);
+            })
+            .catch((error) => {
+              console.error('Error:', JSON.stringify(error));
+            });
           })
 
           // addpage
