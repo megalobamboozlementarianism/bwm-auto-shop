@@ -87,7 +87,16 @@ app.post('/addpage', async (req, res) => {
 
 app.post('/cfdns', async (req, res) => {
   reset = false
-  result = [{ "message": `CF & DNS check initiated at ${Date()}` }]
+  result = [{ 
+    "message": `CF & DNS check initiated at ${Date()}`,
+    "site": "n/a",
+    "ip_addr": "n/a",
+    "in_cf": "n/a",
+    "name_servers": "n/a",
+    "original_name_servers": "n/a",
+    "original_registrar": "n/a",
+    "mx records": "n/a"
+  }]
   let bod = []
   bod = req.body
   cfdns(bod, result, reset)
@@ -98,7 +107,12 @@ app.post('/cfdns', async (req, res) => {
 
 app.post('/sitecheck', async (req, res) => {
   reset = false
-  result = [{ "message": `site check initiated at ${Date()}` }]
+  result = [{ 
+    "message": `site check initiated at ${Date()}`,
+    "site": "n/a",
+    "data_type": "message",
+    "datum": `site check initiated at ${Date()}`
+}]
   let bod = []
   bod = req.body
   siteCheck(bod, result, reset)
@@ -109,7 +123,12 @@ app.post('/sitecheck', async (req, res) => {
 
 app.post('/dolighthouse', async (req, res) => {
   reset = false
-  result = [{ "message": `lighthouse check initiated at ${Date()}` }]
+  result = [{
+    "message": `lighthouse check initiated at ${Date()}`,
+    "site": "n/a",
+    "data_type": "message",
+    "datum": `lighthouse check initiated at ${Date()}`
+}]
   let bod = []
   bod = req.body
   doLighthouse(bod, result, reset)
