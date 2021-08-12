@@ -7,7 +7,6 @@ const fs = require("fs");
 // const lighthouse = require('lighthouse');
 const wwwhisper = require('connect-wwwhisper')
 const { chromium } = require("playwright-chromium")
-const chromeLauncher = require('chrome-launcher');
 const port = process.env.PORT || 3000;
 const app = express()
 app.use(wwwhisper())
@@ -19,7 +18,6 @@ const siteCheck = require('./siteCheck');
 const doLighthouse = require('./doLighthouse');
 const cfdns = require('./checkCF')
 const addPage = require('./addPage')
-const jsonToXlsx = require('./jsonToXlsx')
 
 // bot data globals
 let result = [{ "message": "no data to display" }];
