@@ -132,7 +132,9 @@
           <br>
           <p>Note: Requires a JSON array [] of objects {}, with each object having the same set of keys (example below).
           The column headers of the resulting xlsx will be the names of the keys.</p>
-          <pre>                      (example)
+          <div style="display: flex;">
+            <div style="flex: 1; margin-right: 20px;">
+<pre>                      (example)
 [
   {
     "site": "https://mysite1.com/",
@@ -158,13 +160,15 @@
     "pwa": 50,
     "seo": 93
   }
-]         </pre>
-          <br>
-          <div id="paste-json">
-              <form id="paste-json-form">
-                <textarea class="textarea" id="paste-json-input" rows=7 cols=50 value="" placeholder="paste json here"></textarea>
-                <input type="submit" name="submit" value="upload"></input>
-              </form>
+]         
+</pre>
+            </div>
+            <div id="paste-json" style="flex: 1;">
+                <form id="paste-json-form">
+                  <textarea class="textarea" id="paste-json-input" rows=7 cols=50 value="" placeholder="paste json here"></textarea>
+                  <input type="submit" name="submit" value="upload"></input>
+                </form>
+            </div>
           </div>
       </div>
 
@@ -255,7 +259,7 @@
           </div>
     </div>
 
-    <div class="notification">
+    <div class="notification status">
       <div class="websocket-test">
         <h1 class="title">Status</h1>
         <p id='pings'></p>
@@ -282,22 +286,24 @@
           .then(data => {
             resultsContainer.innerHTML = `<br><pre>${JSON.stringify(data, null, 2)}</pre>`
           }) 
+          
           //websocket stuff
-            const status = document.querySelector('#pings')
-            const host = location.origin.replace(/^http/, 'ws')
-            const ws = new WebSocket(host);
-            ws.onmessage = function (event) {
-            let obj = JSON.parse((event.data))
-            let last_item = obj[obj.length - 1]
-            if (last_item.message) {
-              status.innerHTML = `${last_item.message}`
-            } else if (last_item.data_type) {
-              status.innerHTML = `currently checking ${last_item.data_type} on ${last_item.site}`
-            } else if (item.in_cf) {
-              status.innerHTML = `currently checking CF & DNS on ${last_item.site}`
-            }
-              resultsContainer.innerHTML = `<br><pre>${JSON.stringify(obj, null, 2)}</pre>` 
-            };
+          const status = document.querySelector('#pings')
+          const host = location.origin.replace(/^http/, 'ws')
+          const ws = new WebSocket(host);
+          ws.onmessage = function (event) {
+          let obj = JSON.parse((event.data))
+          let last_item = obj[obj.length - 1]
+          if (last_item.message) {
+            status.innerHTML = `${last_item.message}`
+          } else if (last_item.data_type) {
+            status.innerHTML = `currently checking ${last_item.data_type} on ${last_item.site}`
+          } else if (item.in_cf) {
+            status.innerHTML = `currently checking CF & DNS on ${last_item.site}`
+          }
+            resultsContainer.innerHTML = `<br><pre>${JSON.stringify(obj, null, 2)}</pre>` 
+          };
+
 
           // bot select menu
           const botSelect = document.querySelector("#bot-select")
