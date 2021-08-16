@@ -17,6 +17,7 @@ module.exports = async function cfdns (sites, result, reset) {
     reset = false
     return;
   }
+  let returned = 0
   try {
     // get cf info
     let num_calls;
@@ -54,16 +55,20 @@ module.exports = async function cfdns (sites, result, reset) {
       let mx = []
       await dns.resolveMx(sites[i], function (err, addresses) {
         if (addresses) {
-          addresses.forEach(elem => mx.push(elem))
+          addresses.forEach(elem => mx.push(`exchange: ${elem.exchange}, priority: ${elem.priority}`))
         } else {
           mx.push("no mx records found")
         }
       })
+      
       let records = []
-      await dns.resolve4(sites[i], async function (err, addresses) {
+      await dns.resolve4(sites[i], (err, addresses) => {
         let index = cf_names.indexOf(sites[i])
         if (cf_names.includes(sites[i])) {
+          returned++
+          console.log("returned " + i + ": " + returned)
           records.push({
+            "message": "n/a",
             "site": sites[i],
             "ip_addr": addresses,
             "in_cf": "yes",
@@ -72,8 +77,12 @@ module.exports = async function cfdns (sites, result, reset) {
             "original_registrar": cf_info[index].original_registrar,
             "mx records": mx
           })
+          result.push(records[0])
         } else {
+          returned++
+          console.log("returned " + i + ": " + returned)
           records.push({
+            "message": "n/a",
             "site": sites[i],
             "ip_addr": addresses,
             "in_cf": "no",
@@ -82,15 +91,25 @@ module.exports = async function cfdns (sites, result, reset) {
             "original_registrar": cf_info[index] || `data not available`,
             "mx records": mx
           })
+          result.push(records[0])
         }
-      });
-      result.push(records)
+        if (returned == sites.length) {
+          result.push({
+            "message": `CF / DNS check completed at ${Date()}`,
+            "site": "n/a",
+            "ip_addr": "n/a",
+            "in_cf": "n/a",
+            "name_servers": "n/a",
+            "original_name_servers": "n/a",
+            "original_registrar": "n/a",
+            "mx records": "n/a"
+          })
+        }
+      }); 
     }
-    result.push({
-      "message": `CF / DNS check completed at ${Date()}`
-    })
   } catch (error) {
     console.log(`error: ${err}`)
-  }
+  } 
+  
 }
 
