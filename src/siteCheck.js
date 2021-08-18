@@ -28,12 +28,14 @@ module.exports = async function siteCheck (siteList, result, reset) {
         await page.goto(currentSite)
         const title = await page.title()
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "Title Tag",
           "datum": `${title}`
         })
       } catch (err) {
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "Title Tag error",
           "datum": err
@@ -44,6 +46,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
       try {
         let h1s = await page.$$eval('h1', hOnes => hOnes.map(h1 => ` ${h1.innerText}`))
         h1s.forEach(elem => result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "h1",
           "datum": `${elem}`
@@ -51,6 +54,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
         h1s = null
       } catch (err) {
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "h1 error",
           "datum": err
@@ -61,6 +65,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
       try {
         let h2s = await page.$$eval('h2', hTwos => hTwos.map(h2 => ` ${h2.innerText}`))
         h2s.forEach(elem => result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "h2",
           "datum": `${elem}`
@@ -68,6 +73,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
         h2s = null
       } catch (err) {
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "h2 error",
           "datum": err
@@ -86,6 +92,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
               let data = JSON.parse(obj)
               let clean = JSON.stringify(data, null, 4);
               result.push({
+                "message": "",
                 "site": `${currentSite}`,
                 "data_type": "Schema",
                 "datum": `${clean}`
@@ -97,6 +104,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
         scripts = null
       } catch (err) {
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "Schema check error",
           "datum": err
@@ -131,6 +139,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
             elem.status = 404
           }
           result.push({
+            "message": "",
             "site": `${currentSite}`,
             "data_type": "Social Link",
             "datum": `${elem.status} ${elem.href}`
@@ -140,6 +149,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
         }
       } catch (err) {
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "social check error",
           "datum": err
@@ -164,6 +174,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
         let runnerResult = await lighthouse(currentSite, options);
         let score = runnerResult.lhr.categories.performance.score * 100;
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "Mobile Speed",
           "datum": score
@@ -173,6 +184,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
         runnerResult = await lighthouse(currentSite, options);
         score = runnerResult.lhr.categories.performance.score * 100;
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "Desktop Speed",
           "datum": score
@@ -185,6 +197,7 @@ module.exports = async function siteCheck (siteList, result, reset) {
 
       } catch (err) {
         result.push({
+          "message": "",
           "site": `${currentSite}`,
           "data_type": "lighthouse error",
           "datum": err
@@ -197,11 +210,15 @@ module.exports = async function siteCheck (siteList, result, reset) {
     chrome = null;
 
     result.push({
-      "message": `SEO site check completed at ${Date()}`
+      "message": `SEO site check completed at ${Date()}`,
+      "site": "",
+      "data_type": "",
+      "datum": ""
     })
     console.log("data ready to check")
   } catch (err) {
     result.push({
+      "message": "error",
       "site": 'n/a',
       "data_type": "general error",
       "datum": err

@@ -69,6 +69,7 @@ module.exports = async function doLighthouse(siteList, result, reset) {
         let runnerResult = await lighthouse(siteList[i], options);
         let score = runnerResult.lhr.categories.performance.score * 100
         result.push({
+          "message": "",
           "site": `${siteList[i]}`,
           "data_type": "desktop speed",
           "datum": score
@@ -78,6 +79,7 @@ module.exports = async function doLighthouse(siteList, result, reset) {
         score = null
       } catch (error) {
         result.push({
+          "message": "",
           "site": `${siteList[i]}`,
           "data_type": "desktop speed",
           "datum": error
@@ -90,7 +92,10 @@ module.exports = async function doLighthouse(siteList, result, reset) {
     await chrome.kill()
     chrome = null
     result.push({
-      "message": `Lighthouse check completed at ${Date()}`
+      "message": `Lighthouse check completed at ${Date()}`,
+      "site": "",
+      "data_type": "",
+      "datum": ""
     })
     console.log("data ready to check")
   } catch (err) {

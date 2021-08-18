@@ -140,7 +140,12 @@ app.post('/dolighthouse', async (req, res) => {
 
 app.get('/hscrape', async (req, res) => {
   reset = false
-  result = [{ "message": `H scrape initiated at ${Date()}` }]
+  result = [{ 
+    "message": `H scrape initiated at ${Date()}`,
+    "site": "",
+    "data_type": "",
+    "datum": ""
+  }]
   const url = req.query.url
   console.log(`Incoming request for URL '${url}'`)
   /** @type {import('playwright-chromium').Browser} */
@@ -157,6 +162,7 @@ app.get('/hscrape', async (req, res) => {
     let done = false
     h1s.forEach(elem => {
       result.push({
+        "message": "",
         "site": url,
         "data_type": "h1",
         "datum": elem
@@ -164,12 +170,18 @@ app.get('/hscrape', async (req, res) => {
     })
     h2s.forEach(elem => {
       result.push({
+        "message": "",
         "site": url,
         "data_type": "h2",
         "datum": elem
       })
     })
-    result.push({ "message": `H scrape completed at ${Date()}` })
+    result.push({
+      "message": `H scrape completed at ${Date()}`,
+      "site": "",
+      "data_type": "",
+      "datum": ""
+    })
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");
     res.send(result)

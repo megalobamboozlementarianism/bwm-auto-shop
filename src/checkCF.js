@@ -66,7 +66,6 @@ module.exports = async function cfdns (sites, result, reset) {
         let index = cf_names.indexOf(sites[i])
         if (cf_names.includes(sites[i])) {
           returned++
-          console.log("returned " + i + ": " + returned)
           records.push({
             "message": "n/a",
             "site": sites[i],
@@ -80,7 +79,6 @@ module.exports = async function cfdns (sites, result, reset) {
           result.push(records[0])
         } else {
           returned++
-          console.log("returned " + i + ": " + returned)
           records.push({
             "message": "n/a",
             "site": sites[i],
@@ -109,6 +107,16 @@ module.exports = async function cfdns (sites, result, reset) {
     }
   } catch (error) {
     console.log(`error: ${err}`)
+    result.push({
+      "message": err,
+      "site": "n/a",
+      "ip_addr": "n/a",
+      "in_cf": "n/a",
+      "name_servers": "n/a",
+      "original_name_servers": "n/a",
+      "original_registrar": "n/a",
+      "mx records": "n/a"
+    })
   } 
   
 }
