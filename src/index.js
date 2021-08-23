@@ -70,7 +70,15 @@ app.post('/json2xlsx', async (req, res) => {
   res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   await res.download("." + '/data.xlsx');
 
-  // fs.unlinkSync('./data.xlsx')
+});
+
+app.post('/gimmexlsx', async (req, res) => {
+  reset = false
+  var xlsx = json2xls(result);
+  fs.writeFileSync('./results.xlsx', xlsx, 'binary');
+  res.setHeader('Content-disposition', 'attachment; filename=results.xlsx');
+  res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  await res.download("." + '/results.xlsx');
 
 });
 
@@ -180,7 +188,7 @@ app.get('/hscrape', async (req, res) => {
       "message": `H scrape completed at ${Date()}`,
       "site": "",
       "data_type": "",
-      "datum": ""
+      "datum": "  "
     })
     res.contentType("application/json")
     res.set("Content-Disposition", "inline;");

@@ -264,6 +264,7 @@
         <h1 class="title">Status</h1>
         <p id='pings'></p>
         <button id="copy">copy results to clipboard</button>
+        <button id="xlsbtn" style="display: none;">download as xlsx</button>
       </div>
       <br>
       <div id="results-container" style="max-height: 500px; overflow-y: scroll;"></div>
@@ -296,6 +297,11 @@
           let last_item = obj[obj.length - 1]
           if (last_item.message) {
             status.innerHTML = `${last_item.message}`
+            if (last_item.message.includes("completed")) {
+              document.querySelector('#xlsbtn').style.display = "block"
+            } else {
+              document.querySelector('#xlsbtn').style.display = "none"
+            }
           } else if (last_item.data_type) {
             status.innerHTML = `currently checking ${last_item.data_type} on ${last_item.site}`
           } else if (item.in_cf) {
@@ -349,6 +355,32 @@
               redirect: 'follow', // manual, *follow, error
               referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
               body: input // body data type must match "Content-Type" header
+            })
+            .then(response => response.blob())
+            .then( blob => {
+              var file = window.URL.createObjectURL(blob);
+              window.location.assign(file);
+            })
+            .catch((error) => {
+              console.error('Error:', JSON.stringify(error));
+            });
+          })
+
+          // json 2 xls download direct from bot button
+          const xlsbtn = document.querySelector('#xlsbtn')
+          xlsbtn.addEventListener("click", (e) => {
+            fetch('/gimmexlsx', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              /*body: input // body data type must match "Content-Type" header */
             })
             .then(response => response.blob())
             .then( blob => {
