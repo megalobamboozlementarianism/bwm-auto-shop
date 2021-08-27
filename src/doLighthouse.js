@@ -25,24 +25,28 @@ module.exports = async function doLighthouse(siteList, result, reset) {
         let runnerResult = await lighthouse(siteList[i], options);
         let bscore = runnerResult.lhr.categories['best-practices'].score * 100
         result.push({
+          "message": "",
           "site": `${siteList[i]}`,
           "data_type": "best practices score",
           "datum": bscore
         })
         let ascore = runnerResult.lhr.categories.accessibility.score * 100
         result.push({
+          "message": "",
           "site": `${siteList[i]}`,
           "data_type": "accessibility score",
           "datum": ascore
         })
         let sscore = runnerResult.lhr.categories.seo.score * 100
         result.push({
+          "message": "",
           "site": `${siteList[i]}`,
           "data_type": "seo score",
           "datum": sscore
         })
         let pscore = runnerResult.lhr.categories.performance.score * 100
         result.push({
+          "message": "",
           "site": `${siteList[i]}`,
           "data_type": "mobile speed",
           "datum": pscore
@@ -55,6 +59,7 @@ module.exports = async function doLighthouse(siteList, result, reset) {
         sscore = null
       } catch (error) {
         result.push({
+          "message": "error",
           "site": `${siteList[i]}`,
           "data_type": "lighthouse",
           "datum": error
